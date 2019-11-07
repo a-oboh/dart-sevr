@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Dart",
-            "program": "lib/src/sevr_base.dart",
+            "program": "lib/main.dart",
             "request": "launch",
             "type": "dart"
         }

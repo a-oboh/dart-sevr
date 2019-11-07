@@ -1,16 +1,19 @@
 import 'package:sevr/sevr.dart';
+import 'package:sevr/src/sevr_base.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('A group of tests', () {
-    Awesome awesome;
+  group('Test host connection', () {
+    Connect connect;
+    int port = 4040;
 
     setUp(() {
-      awesome = Awesome();
+      connect = Connect();
+      connect.host(port, 'Listening on port: ${port}');
     });
 
     test('First Test', () {
-      expect(awesome.isAwesome, isTrue);
+      expect(connect.messageReturn, 'Listening on port: ${port}');
     });
   });
 }
