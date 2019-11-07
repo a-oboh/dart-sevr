@@ -3,7 +3,7 @@
 /// Checks if you are awesome. Spoiler: you are.
 import 'dart:io';
 
-class Connect {
+class Sevr {
   // Connect(int port) {
   //   this.port = port;
   // }

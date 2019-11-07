@@ -4,16 +4,16 @@ import 'package:test/test.dart';
 
 void main() {
   group('Test host connection', () {
-    Connect connect;
+    Sevr sevr;
     int port = 4040;
 
     setUp(() {
-      connect = Connect();
-      connect.host(port, 'Listening on port: ${port}');
+      sevr = Sevr();
+      sevr.host(port, 'Listening on port: ${port}');
     });
 
     test('First Test', () {
-      expect(connect.messageReturn, 'Listening on port: ${port}');
+      expect(sevr.messageReturn, 'Listening on port: ${port}');
     });
   });
 }
