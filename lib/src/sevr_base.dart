@@ -42,19 +42,24 @@ class Serv {
 
     }
 
-    call(HttpRequest request){
-        print(request.uri);
-        // if(request.method == 'GET'){
-        //   if(router.getRoutes.contains(request.uri.path)){
-        //     int index = router.getRoutes.indexOf(request.uri.path);
-        //     router.gets[index][]
-        //   }
-        // }
-        request.response
-                  ..statusCode = 200
-                  ..write(request.uri)
-                  ..close();
-    }
+    call(HttpRequest request)async{
+        if(request.method == 'GET'){
+          _handleGet(request);
+                  }
+              }
+          
+            void _handleGet(HttpRequest request)async {
+               if(router.getRoutes.contains(request.uri.toString())){
+            int index = router.getRoutes.indexOf(request.uri.path);
+            List<Function(HttpRequest req,{bool next})> callbacks = router.gets[index][request.uri.toString()];
+            callbacks.forEach((Function(HttpRequest req,{bool next}) func){
+                func(request);
+            });
+          } else {
+            request.response.statusCode = HttpStatus.notFound;
+            await request.response.close();
+          }
+            }
   
   }
   

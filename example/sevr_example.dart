@@ -1,14 +1,15 @@
-import 'dart:io';
-
 import 'package:sevr/sevr.dart';
 
 main() {
   var serv = Serv();
   var router = serv.router;
 
-  router.get('/test',[(HttpRequest req,{next=false}){
+  router.get('/test',[(req,{next=false})async{
     final res = req.response;
-    res.statusCode = HttpStatus.ok;
+     res
+         ..statusCode = 200
+          ..write(req.uri);
+        await res.close();
     
   }]);
   // router.put();
