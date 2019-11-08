@@ -9,7 +9,7 @@ void main() {
 
     setUp(() {
       sevr = Sevr();
-      sevr.host(port, 'Listening on port: ${port}');
+      sevr.listen(port, messageReturn:'Listening on port: ${port}');
     });
 
     test('First Test', () {
