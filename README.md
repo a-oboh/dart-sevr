@@ -40,5 +40,5 @@ Please file feature requests and bugs at the [issue tracker][tracker].
 
 Fork the repo, clone and raise your pull requests against the dev branch, We look forward to your your commits! 😀
 
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/a-oboh/dart-sevr/issues
 [express]: https://expressjs.com/
