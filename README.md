@@ -1,6 +1,9 @@
-A library for Dart developers.
+A library for building REST APIs easily with Dart.
 
-Created from templates made available by Stagehand under a BSD-style
+## Inspiration
+
+Our inspiration is the simplicity of [express js][express] 👏.
+
 [license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
 
 ## Usage
@@ -11,7 +14,21 @@ A simple usage example:
 import 'package:sevr/sevr.dart';
 
 main() {
-  var awesome = new Awesome();
+  var serv = Sevr();
+  var router = serv.router;
+
+  router.get('/test',[(req,{next=false})async{
+    final res = req.response;
+     res
+         ..statusCode = 200
+          ..write(req.uri);
+        await res.close();
+
+  }]);
+
+  serv.listen(3000,callback: (){
+    print('Listening on ${3000}');
+  });
 }
 ```
 
@@ -19,4 +36,9 @@ main() {
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
+## Contributing
+
+Fork the repo, clone and raise your pull requests against the dev branch, We look forward to your your commits! 😀
+
 [tracker]: http://example.com/issues/replaceme
+[express]: https://expressjs.com/
