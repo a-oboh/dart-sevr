@@ -19,7 +19,9 @@ class Sevr {
     //listens for connection on the specified port
     listen(int port,{Function callback,SecurityContext context,String messageReturn})async{
       this.messageReturn = messageReturn;
-      callback();
+      if(callback!=null){
+
+      };
       HttpServer server;
       if(context == null){
           server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
