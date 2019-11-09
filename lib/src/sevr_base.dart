@@ -8,6 +8,8 @@ class Sevr {
   String messageReturn = '';
   static final Sevr _serv = Sevr._internal();
   final Router router = Router();
+  int port;
+  var host;
 
   //Exposes a singleton Instance of the class through out its use
   factory Sevr() {
@@ -22,8 +24,10 @@ class Sevr {
       SecurityContext context,
       String messageReturn}) async {
     this.messageReturn = messageReturn;
-    if (callback != null) {}
-    ;
+    if (callback != null) {
+      callback();
+    }
+
     HttpServer server;
     if (context == null) {
       server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
@@ -32,6 +36,9 @@ class Sevr {
           InternetAddress.loopbackIPv4, port, context);
     }
 
+    this.port = port;
+    this.host = InternetAddress.loopbackIPv4;
+
     await for (var request in server) {
       //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
       _serv(request);
@@ -39,8 +46,17 @@ class Sevr {
   }
 
   call(HttpRequest request) async {
-    if (request.method == 'GET') {
-      _handleGet(request);
+    switch (request.method) {
+      case 'GET':
+        _handleGet(request);
+        break;
+
+      case 'POST':
+        _handlePost(request);
+        break;
+
+      default:
+        _handleGet(request);
     }
   }
 
@@ -51,6 +67,20 @@ class Sevr {
           router.gets[index][request.uri.toString()];
       callbacks.forEach((Function(HttpRequest req, {bool next}) func) {
         //we can create a wrapper around the http request we are passing here so we make it much more simpler to use
+        func(request);
+      });
+    } else {
+      request.response.statusCode = HttpStatus.notFound;
+      await request.response.close();
+    }
+  }
+
+  void _handlePost(HttpRequest request) async {
+    if (router.postRoutes.contains(request.uri.toString())) {
+      int index = router.postRoutes.indexOf(request.uri.path);
+      List<Function(HttpRequest req, {bool next})> callbacks =
+          router.posts[index][request.uri.toString()];
+      callbacks.forEach((Function(HttpRequest req, {bool next}) func) {
         func(request);
       });
     } else {
