@@ -57,8 +57,6 @@ class Sevr {
             //Todo handle other content types
             print(req.headers.contentType.toString());
         }
-        
-       
       },onDone: (){
         switch (request.method) {
           case 'GET':
