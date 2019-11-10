@@ -46,10 +46,11 @@ class Sevr {
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
       request.listen((onData)async{
+        Map<String,dynamic> jsonData = {};
         switch (ServContentType(req.headers.contentType.toString())) {
           case ServContentTypeEnum.ApplicationJson:
             String s = String.fromCharCodes(onData);
-            Map<String,dynamic> jsonData = json.decode(s);
+            jsonData.addAll(json.decode(s))  ;
             req.body = jsonData;
             break;
         
