@@ -15,17 +15,11 @@ import 'package:sevr/sevr.dart';
 
 main() {
   var serv = Sevr();
-  var router = serv.router;
 
-  router.get('/test',[(req,{next=false})async{
-    final res = req.response;
-     res
-         ..statusCode = 200
-          ..write(req.uri);
-        await res.close();
-
+  serv.get('/test',[(req,res){
+    return res.status(200).json({'status':'ok'});
   }]);
-
+  
   serv.listen(3000,callback: (){
     print('Listening on ${3000}');
   });
@@ -40,5 +34,5 @@ Please file feature requests and bugs at the [issue tracker][tracker].
 
 Fork the repo, clone and raise your pull requests against the dev branch, We look forward to your your commits! 😀
 
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/a-oboh/dart-sevr/issues
 [express]: https://expressjs.com/
