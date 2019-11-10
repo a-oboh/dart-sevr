@@ -11,7 +11,8 @@ A simple usage example:
 import 'package:sevr/sevr.dart';
 
 main() {
-  var awesome = new Awesome();
+  var sevr = new Sevr();
+  sevr.
 }
 ```
 
