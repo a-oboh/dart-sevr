@@ -1,7 +1,7 @@
 
 import 'dart:convert' as json_helper;
 import 'dart:io';
-import 'package:body_parser/body_parser.dart';
+
 class ServRequest{
   HttpRequest request;
  Map<String,dynamic> body = {};
@@ -9,26 +9,12 @@ class ServRequest{
     this.request = request;
     
       }
-    
-    
-      // Future<Map<String,dynamic>> get body async{
-      //   // return request.
-      //   var b = await parseBody(request);
-      //     // request.listen((onData){
-      //     //   // print(onData.toString() + '\n');
-      //     //   String s = String.fromCharCodes(onData);
-      //     //   print(s);
-      //     //   Map<String,dynamic> jsonData = json.decode(s);
-      //     //   print(jsonData['name']);
-      //     // });
-      //   return b.body;
-      // }
-    
+
       String get path {
         return request.uri.path;
       }
     
-       get header{
+       get headers{
         return request.headers;
       } 
     

@@ -46,7 +46,7 @@ class Sevr {
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
       request.listen((onData)async{
-        switch (ServContentType(req.header.contentType.toString())) {
+        switch (ServContentType(req.headers.contentType.toString())) {
           case ServContentTypeEnum.ApplicationJson:
             String s = String.fromCharCodes(onData);
             Map<String,dynamic> jsonData = json.decode(s);
@@ -55,33 +55,37 @@ class Sevr {
         
           default:
             //Todo handle other content types
-            print(req.header.contentType.toString());
+            print(req.headers.contentType.toString());
         }
         
        
       },onDone: (){
-        if (request.method == 'GET') {
-              _handleGet(req,res);
-    
+        switch (request.method) {
+          case 'GET':
+            _handleGet(req,res);
+            break;
+          default:
         }
       });
     
   }
 
   void _handleGet(ServRequest req, ServResponse res) async {
-  List<Function(ServRequest, ServResponse, [bool next])> selectedCallbacks = router.gets.containsKey(req.path) ||  router.gets.containsKey('${req.path}/')? router.gets[req.path]:null;
-    if (selectedCallbacks!=null) {
-      selectedCallbacks.forEach((Function(ServRequest req,ServResponse res, [bool next]) func) async{
-        //we can create a wrapper around the http request we are passing here so we make it much more simpler to use
-      await func(req,res,true);
-
-      });
+  List<Function(ServRequest, ServResponse)> selectedCallbacks = router.gets.containsKey(req.path) ||  router.gets.containsKey('${req.path}/')? router.gets[req.path]:null;
+    if (selectedCallbacks!=null && selectedCallbacks.isNotEmpty) {
+     for(var func in selectedCallbacks){
+          var result = await func(req,res);
+          print(result.runtimeType);
+          if(result is ServResponse){
+            break;
+          }
+      }
     } else {
       res.status(HttpStatus.notFound).json({'error':'method not found'});
     }
   }
 
-  get(String route,List<Function(ServRequest req,ServResponse res, [bool next])> callbacks){
+  get(String route,List<Function(ServRequest req,ServResponse res)> callbacks){
     this.router.gets[route] = callbacks;
 
        }

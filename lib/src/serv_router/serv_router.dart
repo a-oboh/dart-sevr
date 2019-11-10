@@ -1,44 +1,20 @@
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 
 class Router {
-  Map<String,List<Function(ServRequest req,ServResponse res,[bool next])>> gets = {};
+  Map<String,List<Function(ServRequest req,ServResponse res)>> gets = {};
   // List<String> getRoutes = [];
     
 
-    get(String route,List<Function(ServRequest req,ServResponse res,[bool next])> callbacks){
+    get(String route,List<Function(ServRequest req,ServResponse res)> callbacks){
       gets[route] = callbacks;
 
-       }
-    
-        post(){
-    
-    
-        }
-    
-    
-        patch(){
-    
-    
-        }
-    
-        put(){
-    
-    
-        }
-    
-        delete(){
-    
-    
-        }
-    
-    
-    
-    
-    
-    
-    
-    
-      }
-    
-    class AwesomeRequest {
+    }
+
+  post() {}
+
+  patch() {}
+
+  put() {}
+
+  delete() {}
 }
