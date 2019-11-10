@@ -1,7 +1,9 @@
 // TODO: Put public facing types in this file.
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:body_parser/body_parser.dart';
 import 'package:sevr/src/serv_router/serv_router.dart';
 
 class Sevr {
@@ -24,16 +26,17 @@ class Sevr {
       SecurityContext context,
       String messageReturn}) async {
     this.messageReturn = messageReturn;
-    if (callback != null) {
-      callback();
-    }
 
-    HttpServer server;
+    var server;
     if (context == null) {
       server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
     } else {
       server = await HttpServer.bindSecure(
           InternetAddress.loopbackIPv4, port, context);
+    }
+
+    if (callback != null) {
+      callback();
     }
 
     this.port = port;

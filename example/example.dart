@@ -21,6 +21,15 @@ main() {
   router.post('/post', [
     (req, {next = false}) async {
       final res = req.response;
+      print('post request');
+
+      req.listen((onData) {
+        // print(onData.toString() + '\n');
+        String s = String.fromCharCodes(onData);
+        // print(s);
+        Map<String, dynamic> jsonData = json.decode(s);
+        print(jsonData);
+      });
 
       res
         ..statusCode = 200
