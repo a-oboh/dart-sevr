@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 import 'package:sevr/src/serv_router/serv_router.dart';
-import 'package:body_parser/body_parser.dart';
 
 class Sevr {
   String messageReturn = '';
@@ -113,9 +112,9 @@ class Sevr {
 
   void _handlePost(HttpRequest request) async {}
 
-  void _handleDelete() {}
+  // void _handleDelete() {}
 
-  void _handlePut() {}
+  // void _handlePut() {}
 
-  void _handlePatch() {}
+  // void _handlePatch() {}
 }
