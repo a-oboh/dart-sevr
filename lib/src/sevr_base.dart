@@ -2,10 +2,10 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:convert';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 import 'package:sevr/src/serv_router/serv_router.dart';
+import 'package:body_parser/body_parser.dart';
 
 class Sevr {
   String messageReturn = '';
@@ -53,10 +53,12 @@ class Sevr {
 
   call(HttpRequest request) async {
     print(request.headers.contentType);
+
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
     request.listen((onData) async {
       Map<String, dynamic> jsonData = {};
+
       switch (ServContentType(req.headers.contentType.toString())) {
         case ServContentTypeEnum.ApplicationJson:
           String s = String.fromCharCodes(onData);
@@ -65,7 +67,7 @@ class Sevr {
           break;
 
         default:
-          //Todo handle other content types
+          //TODO: handle other content types
           print(req.headers.contentType.toString());
       }
     }, onDone: () {
@@ -90,6 +92,7 @@ class Sevr {
                 router.gets.containsKey('${req.path}/')
             ? router.gets[req.path]
             : null;
+
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);
@@ -108,9 +111,7 @@ class Sevr {
     this.router.gets[route] = callbacks;
   }
 
-  void _handlePost(HttpRequest request) async {
-    
-  }
+  void _handlePost(HttpRequest request) async {}
 
   void _handleDelete() {}
 

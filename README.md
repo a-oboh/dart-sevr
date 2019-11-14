@@ -1,10 +1,10 @@
-A library for building REST APIs easily with Dart.
+A library for building REST APIs easily with Dart modeled after Express JS for Node Js.
+
+The library is still a work in progress and open to contribution.
 
 ## Inspiration
 
 Our inspiration is the simplicity of [express js][express] 👏.
-
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
 
 ## Usage
 
