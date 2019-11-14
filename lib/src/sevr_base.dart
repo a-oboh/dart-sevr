@@ -1,10 +1,9 @@
-// TODO: Put public facing types in this file.
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 import 'package:sevr/src/serv_router/serv_router.dart';
+import 'package:body_parser/body_parser.dart';
 
 class Sevr {
   String messageReturn = '';
@@ -20,7 +19,7 @@ class Sevr {
 
   Sevr._internal();
 
-  //listens for connection on the specified port
+  ///listens for connection on the specified port, ``port: port to listen, callback: function with message to print``
   listen(int port,
       {Function callback,
       SecurityContext context,
@@ -51,7 +50,9 @@ class Sevr {
   }
 
   call(HttpRequest request) async {
-    print(request.headers.contentType);
+    var parse = await parseBody(request);
+    print(parse.body);
+    // var convert = await request.transform(Utf8Decoder()).join();
 
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
@@ -65,6 +66,12 @@ class Sevr {
           req.body = jsonData;
           break;
 
+        case ServContentTypeEnum.ApplicationFormUrlEncoded:
+          String s = String.fromCharCodes(onData);
+          jsonData.addAll(json.decode(s));
+          print(s);
+          break;
+
         default:
           //TODO: handle other content types
           print(req.headers.contentType.toString());
@@ -76,13 +83,25 @@ class Sevr {
           break;
 
         case 'POST':
-          _handlePost(request);
+          _handlePost(req, res);
           break;
 
         default:
           _handleGet(req, res);
       }
     });
+  }
+
+  ///create a `get` request, route: uri, callbacks: list of callback functions to run.
+  get(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.gets[route] = callbacks;
+  }
+
+  ///create a `post` request, route: uri, callbacks: list of callback functions to run.
+  post(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.posts[route] = callbacks;
   }
 
   void _handleGet(ServRequest req, ServResponse res) async {
@@ -105,12 +124,25 @@ class Sevr {
     }
   }
 
-  get(String route,
-      List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.gets[route] = callbacks;
-  }
+  void _handlePost(ServRequest req, ServResponse res) async {
+    List<Function(ServRequest, ServResponse)> selectedCallbacks =
+        router.posts.containsKey(req.path) ||
+                router.posts.containsKey('${req.path}/')
+            ? router.posts[req.path]
+            : null;
 
-  void _handlePost(HttpRequest request) async {}
+    if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
+      for (var func in selectedCallbacks) {
+        var result = await func(req, res);
+        print(result.runtimeType);
+        if (result is ServResponse) {
+          break;
+        }
+      }
+    } else {
+      res.status(HttpStatus.notFound).json({'error': 'method not found'});
+    }
+  }
 
   // void _handleDelete() {}
 
