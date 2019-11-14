@@ -25,7 +25,7 @@ class ServRequest {
 
 class ServResponse {
   HttpRequest request;
-  
+
   Map<String, dynamic> locals = {};
 
   ServResponse(HttpRequest request) {

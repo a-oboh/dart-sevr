@@ -1,5 +1,5 @@
 name: sevr
-description: A starting point for Dart libraries or applications.
+description: A library to easily create http servers with Dart and perform Http requests.
 version: 1.0.0
 homepage: https://github.com/a-oboh/dart-sevr
 authors: 
