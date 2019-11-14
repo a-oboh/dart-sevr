@@ -1,12 +1,12 @@
-import 'dart:io';
+import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 
 class Router {
-  List<Map<String, List<Function(HttpRequest req, {bool next})>>> gets = [];
-  List<String> getRoutes = [];
+  Map<String, List<Function(ServRequest req, ServResponse res)>> gets = {};
+  // List<String> getRoutes = [];
 
-  get(String route, List<Function(HttpRequest req, {bool next})> callbacks) {
-    getRoutes.add(route);
-    gets.add({route: callbacks});
+  get(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    gets[route] = callbacks;
   }
 
   post() {}
@@ -17,5 +17,3 @@ class Router {
 
   delete() {}
 }
-
-class AwesomeRequest {}
