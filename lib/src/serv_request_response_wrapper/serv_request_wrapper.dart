@@ -1,12 +1,15 @@
 
+import 'dart:async';
 import 'dart:convert' as json_helper;
 import 'dart:io';
 
 class ServRequest{
   HttpRequest request;
  Map<String,dynamic> body = {};
+ Map<String,dynamic> files = {};
   ServRequest(HttpRequest request){
     this.request = request;
+    
     
       }
 
@@ -71,4 +74,13 @@ class ServResponse{
 
 
 
+}
+
+
+class SevrFile {
+  StreamController streamController;
+  String filename;
+  String name;
+
+  SevrFile(this.name,this.filename,this.streamController);
 }

@@ -1,10 +1,16 @@
 // TODO: Put public facing types in this file.
 
+import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:mime/mime.dart';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 import 'package:sevr/src/serv_router/serv_router.dart';
+import 'package:http_server/http_server.dart';
+import 'package:pedantic/pedantic.dart';
 
 class Sevr {
   String messageReturn = '';
@@ -45,64 +51,125 @@ class Sevr {
     print(request.headers.contentType);
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
-      request.listen((onData)async{
-        Map<String,dynamic> jsonData = {};
-        switch (ServContentType(req.headers.contentType.toString())) {
-          case ServContentTypeEnum.ApplicationJson:
-            String s = String.fromCharCodes(onData);
-            jsonData.addAll(json.decode(s))  ;
-            req.body = jsonData;
-            break;
-        
-          default:
-            //Todo handle other content types
-            print(req.headers.contentType.toString());
-        }
-      },onDone: (){
-        switch (request.method) {
-          case 'GET':
-            _handleGet(req,res);
-            break;
-          default:
-        }
-      });
-    
-  }
+    String contentType = req.headers.contentType.toString();
+    Map<String, dynamic> jsonData = {};
+    dynamic downloadData = List<int>();
+    List<dynamic> tempOnData = List<int>();
+    if (contentType.contains('multipart/form-data')) {
+      contentType = 'multipart/form-data';
+    }
 
-  void _handleGet(ServRequest req, ServResponse res) async {
-  List<Function(ServRequest, ServResponse)> selectedCallbacks = router.gets.containsKey(req.path) ||  router.gets.containsKey('${req.path}/')? router.gets[req.path]:null;
-    if (selectedCallbacks!=null && selectedCallbacks.isNotEmpty) {
-     for(var func in selectedCallbacks){
-          var result = await func(req,res);
-          print(result.runtimeType);
-          if(result is ServResponse){
-            break;
+    switch (ServContentType(contentType)) {
+      case ServContentTypeEnum.ApplicationJson:
+        StreamSubscription _sub;
+        _sub = request.listen((Uint8List onData) {
+          downloadData.addAll(onData);
+        }, onDone: () {
+          String s = String.fromCharCodes(downloadData);
+          jsonData.addAll(json.decode(s));
+          req.body = jsonData;
+
+          switch (request.method) {
+            case 'GET':
+              _handleGet(req, res);
+              break;
+            default:
           }
-      }
-    } else {
-      res.status(HttpStatus.notFound).json({'error':'method not found'});
+        });
+
+        break;
+      case ServContentTypeEnum.MultipartFormData:
+        String boundary = request.headers.contentType.parameters['boundary'];
+        List fileKeys = [];
+        request.transform(MimeMultipartTransformer(boundary)).listen(
+            (MimeMultipart onData) async {
+          HttpMultipartFormData formDataObject =
+              HttpMultipartFormData.parse(onData);
+          if (formDataObject.isBinary ||
+              formDataObject.contentDisposition.parameters
+                  .containsKey('filename')) {
+            print('isBinary');
+            print('${formDataObject.contentDisposition.parameters}');
+            if (!fileKeys.contains(
+                formDataObject.contentDisposition.parameters['name'])) {
+              fileKeys
+                  .add(formDataObject.contentDisposition.parameters['name']);
+              StreamController _fileStreamController = StreamController();
+              SevrFile requestFileObject = SevrFile(
+                  formDataObject.contentDisposition.parameters['name'],
+                  formDataObject.contentDisposition.parameters['filename'],
+                  _fileStreamController);
+              req.files[formDataObject.contentDisposition.parameters['name']] =
+                  requestFileObject;
+            }
+            StreamController _fcont = req
+                .files[formDataObject.contentDisposition.parameters['name']]
+                .streamController;
+            unawaited(
+                _fcont.sink.addStream(formDataObject).then((dynamic c) async {
+              return _fcont.sink.close();
+            }));
+          } else {
+            // formDataObject.listen((onData) {
+            jsonData.addAll({
+              formDataObject.contentDisposition.parameters['name']:
+                  await formDataObject.join()
+            });
+            req.body = jsonData;
+            // });
+          }
+        }, onDone: () {});
+        Future.delayed(Duration.zero, () {
+          switch (request.method) {
+            case 'GET':
+              _handleGet(req, res);
+              break;
+          }
+        });
+        break;
+
+      case ServContentTypeEnum.ApplicationFormUrlEncoded:
+        // Yet to be implememnted
+        break;
+
+      default:
+        break;
     }
   }
 
-  get(String route,List<Function(ServRequest req,ServResponse res)> callbacks){
+  void _handleGet(ServRequest req, ServResponse res) async {
+    List<Function(ServRequest, ServResponse)> selectedCallbacks =
+        router.gets.containsKey(req.path) ||
+                router.gets.containsKey('${req.path}/')
+            ? router.gets[req.path]
+            : null;
+    if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
+      for (var func in selectedCallbacks) {
+        var result = await func(req, res);
+        print(result.runtimeType);
+        if (result is ServResponse) {
+          break;
+        }
+      }
+    } else {
+      res.status(HttpStatus.notFound).json({'error': 'method not found'});
+    }
+  }
+
+  get(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
     this.router.gets[route] = callbacks;
-
-       }
-  void _handlePost(){
-
   }
 
-  void _handleDelete(){
+  void _handlePost() {}
 
+  void _handleDelete() {}
+
+  void _handlePut() {}
+
+  void _handlePatch() {}
+
+  String parseUrlEncodedValuesToString(String keyVal) {
+    return null;
   }
-
-  void _handlePut(){
-
-  }
-
-  void _handlePatch(){
-
-  }
-
-
 }
