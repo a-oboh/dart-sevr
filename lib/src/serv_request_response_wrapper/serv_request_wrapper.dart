@@ -61,8 +61,8 @@ class ServResponse{
     // print(data);
     response
           ..headers.contentType =ContentType.json
-          ..write(json_helper.json.encode(data))
-          ..close();
+          ..write(json_helper.json.encode(data));
+          // ..close();
     
     return this;
   }
