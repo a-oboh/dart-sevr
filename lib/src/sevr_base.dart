@@ -25,9 +25,6 @@ class Sevr {
       SecurityContext context,
       String messageReturn}) async {
     this.messageReturn = messageReturn;
-    if (callback != null) {
-      callback();
-    }
     var server;
     if (context == null) {
       server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
@@ -50,8 +47,6 @@ class Sevr {
   }
 
   call(HttpRequest request) async {
-    var parse = await parseBody(request);
-    print(parse.body);
     // var convert = await request.transform(Utf8Decoder()).join();
 
     ServRequest req = ServRequest(request);
@@ -67,9 +62,9 @@ class Sevr {
           break;
 
         case ServContentTypeEnum.ApplicationFormUrlEncoded:
-          String s = String.fromCharCodes(onData);
-          jsonData.addAll(json.decode(s));
-          print(s);
+          print(String.fromCharCodes(onData));
+          
+
           break;
 
         default:

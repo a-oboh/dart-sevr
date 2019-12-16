@@ -10,8 +10,14 @@ main() {
     }
   ]);
 
-  serv.listen(3000, callback: () {
-    print('Listening on ${3000}');
+  serv.post('/post', [
+    (req, res) {
+      return res.status(200);
+    }
+  ]);
+
+  serv.listen(4000, callback: () {
+    print('Listening on ${4000}');
   });
 }
 
