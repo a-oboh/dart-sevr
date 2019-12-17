@@ -1,9 +1,8 @@
-
 import 'dart:async';
 import 'dart:convert' as json_helper;
 import 'dart:io';
 
-class ServRequest{
+class ServRequest {
   HttpRequest request;
  Map<String,dynamic> body = {};
  Map<String,dynamic> files = {};
@@ -24,21 +23,15 @@ class ServRequest{
       String get type {
         return request.headers.contentType.value;
       }
-    
-      
-
-
-
-
-
-
+  
 }
 
-
-class ServResponse{
+class ServResponse {
   HttpRequest request;
-  Map<String,dynamic> locals = {};
-  ServResponse(HttpRequest request){
+  
+  Map<String, dynamic> locals = {};
+
+  ServResponse(HttpRequest request) {
     this.request = request;
   }
 
@@ -46,17 +39,16 @@ class ServResponse{
 
   // }
 
-  HttpResponse get response{
+  HttpResponse get response {
     return this.request.response;
   }
 
-  ServResponse status(int statusCode){
+  ServResponse status(int statusCode) {
     response.statusCode = statusCode;
     return this;
-
   }
 
-  ServResponse json(Map<String,dynamic> data){
+  ServResponse json(Map<String, dynamic> data) {
     // print('you just called me');
     // print(data);
     response
@@ -67,9 +59,9 @@ class ServResponse{
     return this;
   }
 
-  ServResponse set(String name, Object value){
-      response.headers.set(name, value);
-      return this;
+  ServResponse set(String name, Object value) {
+    response.headers.set(name, value);
+    return this;
   }
 
 
