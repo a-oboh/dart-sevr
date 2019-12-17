@@ -5,11 +5,11 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:mime/mime.dart';
+import 'package:sevr/src/mime/mime.dart';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 import 'package:sevr/src/serv_router/serv_router.dart';
-import 'package:http_server/http_server.dart';
+import 'package:sevr/src/http_server/http_server.dart';
 import 'package:pedantic/pedantic.dart';
 
 class Sevr {
@@ -105,10 +105,10 @@ class Sevr {
             StreamController _fcont = req
                 .files[formDataObject.contentDisposition.parameters['name']]
                 .streamController;
-              unawaited(
-                  _fcont.sink.addStream(formDataObject).then((dynamic c) async {
-                return _fcont.close();
-              }));
+            unawaited(
+                _fcont.sink.addStream(formDataObject).then((dynamic c) async {
+              return _fcont.close();
+            }));
           } else {
             // formDataObject.listen((onData) {
             jsonData.addAll({
@@ -148,19 +148,19 @@ class Sevr {
         var result = await func(req, res);
         print(result.runtimeType);
         if (result is ServResponse) {
-          if (req.files.isNotEmpty){
+          if (req.files.isNotEmpty) {
             for (int i = 0; i < req.files.keys.length; i++) {
-        File file = File(req.files[req.files.keys.toList()[i]].filename);
-        StreamController fileC = req.files[req.files.keys.toList()[i]].streamController;
-        if(!fileC.isClosed){
-          await for (var data
-            in req.files[req.files.keys.toList()[i]].streamController.stream) {
-                //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-         
-        }
-        }
-        
-      }
+              File file = File(req.files[req.files.keys.toList()[i]].filename);
+              StreamController fileC =
+                  req.files[req.files.keys.toList()[i]].streamController;
+              if (!fileC.isClosed) {
+                await for (var data in req.files[req.files.keys.toList()[i]]
+                    .streamController.stream) {
+                  //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
+
+                }
+              }
+            }
           }
           await res.response.close();
           break;
