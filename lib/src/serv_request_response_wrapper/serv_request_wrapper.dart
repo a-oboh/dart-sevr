@@ -1,44 +1,35 @@
-
 import 'dart:async';
 import 'dart:convert' as json_helper;
 import 'dart:io';
 
-class ServRequest{
+class ServRequest {
   HttpRequest request;
- Map<String,dynamic> body = {};
- Map<String,dynamic> files = {};
-  ServRequest(HttpRequest request){
+  Map<String, dynamic> body = {};
+  Map<String, dynamic> files = {};
+  ServRequest(HttpRequest request) {
     this.request = request;
-    
-    
-      }
+  }
 
-      String get path {
-        return request.uri.path;
-      }
-    
-       get headers{
-        return request.headers;
-      } 
-    
-      String get type {
-        return request.headers.contentType.value;
-      }
-    
-      
+  /// the uri/path for an endpoint
+  String get path {
+    return request.uri.path;
+  }
 
+  /// request headers
+  get headers {
+    return request.headers;
+  }
 
-
-
-
-
+  /// type of request, e.g `application/json`
+  String get type {
+    return request.headers.contentType.value;
+  }
 }
 
-
-class ServResponse{
+class ServResponse {
   HttpRequest request;
-  Map<String,dynamic> locals = {};
-  ServResponse(HttpRequest request){
+  Map<String, dynamic> locals = {};
+  ServResponse(HttpRequest request) {
     this.request = request;
   }
 
@@ -46,41 +37,36 @@ class ServResponse{
 
   // }
 
-  HttpResponse get response{
+  HttpResponse get response {
     return this.request.response;
   }
 
-  ServResponse status(int statusCode){
+  ServResponse status(int statusCode) {
     response.statusCode = statusCode;
     return this;
-
   }
 
-  ServResponse json(Map<String,dynamic> data){
+  ServResponse json(Map data) {
     // print('you just called me');
     // print(data);
     response
-          ..headers.contentType =ContentType.json
-          ..write(json_helper.json.encode(data));
-          // ..close();
-    
+      ..headers.contentType = ContentType.json
+      ..write(json_helper.json.encode(data));
+    // ..close();
+
     return this;
   }
 
-  ServResponse set(String name, Object value){
-      response.headers.set(name, value);
-      return this;
+  ServResponse set(String name, Object value) {
+    response.headers.set(name, value);
+    return this;
   }
-
-
-
 }
-
 
 class SevrFile {
   StreamController streamController;
   String filename;
   String name;
 
-  SevrFile(this.name,this.filename,this.streamController);
+  SevrFile(this.name, this.filename, this.streamController);
 }
