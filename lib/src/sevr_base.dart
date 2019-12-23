@@ -23,7 +23,7 @@ class Sevr {
 
   Sevr._internal();
 
-  //listens for connection on the specified port
+  /// listens for connection on the specified port
   listen(int port,
       {Function callback,
       SecurityContext context,
