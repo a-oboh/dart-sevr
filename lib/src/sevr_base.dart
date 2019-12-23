@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -15,6 +14,8 @@ class Sevr {
   String messageReturn = '';
   static final Sevr _serv = Sevr._internal();
   final Router router = Router();
+  int port;
+  var host;
 
   //Exposes a singleton Instance of the class through out its use
   factory Sevr() {
@@ -32,13 +33,17 @@ class Sevr {
     if (callback != null) {
       callback();
     }
-    HttpServer server;
+    var server;
     if (context == null) {
       server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
     } else {
       server = await HttpServer.bindSecure(
           InternetAddress.loopbackIPv4, port, context);
     }
+    
+
+    this.port = port;
+    this.host = InternetAddress.loopbackIPv4;
 
     await for (var request in server) {
       //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
@@ -48,6 +53,7 @@ class Sevr {
 
   dynamic call(HttpRequest request) async {
     print(request.headers.contentType);
+
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
     String contentType = req.headers.contentType.toString();
