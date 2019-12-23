@@ -46,13 +46,14 @@ class ServResponse {
     return this;
   }
 
-  ServResponse json(Map data) {
+  /// Return data in json format. data = a map to be converted to json
+  ServResponse json(Map<String, dynamic> data) {
     // print('you just called me');
     // print(data);
     response
       ..headers.contentType = ContentType.json
-      ..write(json_helper.json.encode(data));
-    // ..close();
+      ..write(json_helper.json.encode(data))
+      ..close();
 
     return this;
   }

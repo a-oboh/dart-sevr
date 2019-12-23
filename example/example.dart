@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:sevr/sevr.dart';
 
 main() {
@@ -11,9 +13,9 @@ main() {
   ]);
 
   serv.post('/post', [
-    (req, res) {
+    (req, res) async {
       print(req.body);
-      return res.status(200);
+      return res.status(200).json(req.body);
     }
   ]);
 
