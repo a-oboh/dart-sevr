@@ -6,6 +6,7 @@ class ServRequest {
   HttpRequest request;
  Map<String,dynamic> body = {};
  Map<String,dynamic> files = {};
+ Map<String,String> params = {};
   ServRequest(HttpRequest request){
     this.request = request;
     
@@ -56,6 +57,11 @@ class ServResponse {
           ..write(json_helper.json.encode(data));
           // ..close();
     
+    return this;
+  }
+
+  ServResponse close(){
+    response.close();
     return this;
   }
 

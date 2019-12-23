@@ -41,7 +41,6 @@ class Sevr {
       server = await HttpServer.bindSecure(
           InternetAddress.loopbackIPv4, port, context);
     }
-    
 
     this.port = port;
     this.host = InternetAddress.loopbackIPv4;
@@ -72,8 +71,10 @@ class Sevr {
           downloadData.addAll(onData);
         }, onDone: () {
           String s = String.fromCharCodes(downloadData);
-          jsonData.addAll(json.decode(s));
-          req.body = jsonData;
+          if (s.isNotEmpty) {
+            jsonData.addAll(json.decode(s));
+            req.body = jsonData;
+          }
 
           switch (request.method) {
             case 'GET':
@@ -144,36 +145,34 @@ class Sevr {
   }
 
   void _handleGet(ServRequest req, ServResponse res) async {
+    String path = req.path.endsWith('/')
+        ? req.path.replaceRange(req.path.length - 1, req.path.length, '')
+        : req.path;
+    print(path);
+    Map mapRes = getRouteParams(path, router.gets);
+    Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
+    req.params = params.cast<String, String>() ?? {};
+    String matched = mapRes['route'];
+    print(matched);
     List<Function(ServRequest, ServResponse)> selectedCallbacks =
-        router.gets.containsKey(req.path) ||
-                router.gets.containsKey('${req.path}/')
-            ? router.gets[req.path]
-            : null;
+        router.gets.containsKey(path)
+            ? router.gets[path]
+            : matched != null ? router.gets[matched] : null;
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);
         print(result.runtimeType);
         if (result is ServResponse) {
-          if (req.files.isNotEmpty) {
-            for (int i = 0; i < req.files.keys.length; i++) {
-              File file = File(req.files[req.files.keys.toList()[i]].filename);
-              StreamController fileC =
-                  req.files[req.files.keys.toList()[i]].streamController;
-              if (!fileC.isClosed) {
-                await for (var data in req.files[req.files.keys.toList()[i]]
-                    .streamController.stream) {
-                  //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-
-                }
-              }
-            }
-          }
+          await _consumeOpenFileStreams(req);
           await res.response.close();
           break;
         }
       }
     } else {
-      res.status(HttpStatus.notFound).json({'error': 'method not found'});
+      await _consumeOpenFileStreams(req);
+      res
+          .status(HttpStatus.notFound)
+          .json({'error': 'method not found'}).close();
     }
   }
 
@@ -192,5 +191,45 @@ class Sevr {
 
   String parseUrlEncodedValuesToString(String keyVal) {
     return null;
+  }
+
+  Map<String, dynamic> getRouteParams(String route, Map<String, List> query) {
+    Map<String, dynamic> compareMap = {'params': {}, 'route': null};
+    String matched = query.keys.firstWhere((String key) {
+      List<String> routeArr = route.split('/');
+      List<String> keyArr = key.split('/');
+      if (routeArr.length != keyArr.length) return false;
+      for (int i = 0; i < routeArr.length; i++) {
+        if (routeArr[i].toLowerCase() == keyArr[i].toLowerCase() ||
+            keyArr[i].toLowerCase().startsWith(':')) {
+          if (keyArr[i].toLowerCase().startsWith(':')) {
+            compareMap['params'][keyArr[i].replaceFirst(':', '')] = routeArr[i];
+          }
+        } else {
+          return false;
+        }
+      }
+      return true;
+    }, orElse: () {
+      return null;
+    });
+    compareMap['route'] = matched;
+    return compareMap;
+  }
+
+  Future<void> _consumeOpenFileStreams(ServRequest req) async {
+    if (req.files.isNotEmpty) {
+      for (int i = 0; i < req.files.keys.length; i++) {
+        File file = File(req.files[req.files.keys.toList()[i]].filename);
+        SevrFile fileC = req.files[req.files.keys.toList()[i]];
+        if (!fileC.streamController.isClosed) {
+          await for (var data in fileC.streamController.stream) {
+            //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
+
+          }
+        }
+      }
+    }
+    return;
   }
 }
