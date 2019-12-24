@@ -7,13 +7,13 @@ main() {
 
   //We can create controller,middleware classes etc, put them in a list and pass them into the router methods
   serv.get('/test', [
-    (req, res) {
+    (ServRequest req, ServResponse res) {
       return res.status(200).json({'status': 'ok'});
     }
   ]);
 
   serv.post('/post', [
-    (req, res) async {
+    (ServRequest req, ServResponse res) async {
       print(req.body);
       return res.status(200).json(req.body);
     }

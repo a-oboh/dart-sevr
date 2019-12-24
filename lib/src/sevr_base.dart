@@ -71,19 +71,12 @@ class Sevr {
           downloadData.addAll(onData);
         }, onDone: () {
           String s = String.fromCharCodes(downloadData);
-          jsonData.addAll(json.decode(s));
-          req.body = jsonData;
-
-          switch (request.method) {
-            case 'GET':
-              _handleGet(req, res);
-              break;
-
-            case 'POST':
-              _handlePost(req, res);
-              break;
-            default:
+          if (s.isNotEmpty) {
+            jsonData.addAll(json.decode(s));
+            req.body = jsonData;
           }
+
+          _handleRequests(req, res, request.method);
         });
 
         break;
@@ -131,20 +124,14 @@ class Sevr {
               formDataObject.contentDisposition.parameters['name']:
                   await formDataObject.join()
             });
+            print(':;;;;;;;;;;;');
             req.body = jsonData;
+            print(jsonData);
             // });
           }
         }, onDone: () {});
         Future.delayed(Duration.zero, () {
-          switch (request.method) {
-            case 'GET':
-              _handleGet(req, res);
-              break;
-
-            case 'POST':
-              _handlePost(req, res);
-              break;
-          }
+          _handleRequests(req, res, request.method);
         });
         break;
 
@@ -161,21 +148,21 @@ class Sevr {
         req.body = result;
 
         Future.delayed(Duration.zero, () {
-          switch (request.method) {
-            case 'GET':
-              _handleGet(req, res);
-              break;
-
-            case 'POST':
-              _handlePost(req, res);
-              break;
-          }
+          _handleRequests(req, res, request.method);
         });
         break;
 
       default:
         break;
     }
+  }
+
+  Map get getAllRoutes{
+    return {
+      'GET': router.gets,
+      'POST':router.posts
+
+    };
   }
 
   ///create a `get` request, route: uri, callbacks: list of callback functions to run.
@@ -190,68 +177,77 @@ class Sevr {
     this.router.posts[route] = callbacks;
   }
 
-  void _handleGet(ServRequest req, ServResponse res) async {
+  void _handleRequests(ServRequest req, ServResponse res, String reqType) async {
+    Map reqTypeMap = getAllRoutes[reqType];
+    String path = req.path.endsWith('/')
+        ? req.path.replaceRange(req.path.length - 1, req.path.length, '')
+        : req.path;
+    print(path);
+    Map mapRes = getRouteParams(path, router.gets);
+    Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
+    req.params = params.cast<String, String>() ?? {};
+    String matched = mapRes['route'];
+    print(matched);
     List<Function(ServRequest, ServResponse)> selectedCallbacks =
-        router.gets.containsKey(req.path) ||
-                router.gets.containsKey('${req.path}/')
-            ? router.gets[req.path]
-            : null;
-
+        reqTypeMap.containsKey(path)
+            ? reqTypeMap[path]
+            : matched != null ? reqTypeMap[matched] : null;
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);
         print(result.runtimeType);
         if (result is ServResponse) {
-          if (req.files.isNotEmpty) {
-            for (int i = 0; i < req.files.keys.length; i++) {
-              File file = File(req.files[req.files.keys.toList()[i]].filename);
-              StreamController fileC =
-                  req.files[req.files.keys.toList()[i]].streamController;
-              if (!fileC.isClosed) {
-                await for (var data in req.files[req.files.keys.toList()[i]]
-                    .streamController.stream) {
-                  //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-                }
-              }
-            }
+          await _consumeOpenFileStreams(req);
+          await res.close();
+          break;
+        }
+      }
+    } else {
+      await _consumeOpenFileStreams(req);
+      res
+          .status(HttpStatus.notFound)
+          .json({'error': 'method not found'}).close();
+    }
+  }
+
+  Map<String, dynamic> getRouteParams(String route, Map<String, List> query) {
+    Map<String, dynamic> compareMap = {'params': {}, 'route': null};
+    String matched = query.keys.firstWhere((String key) {
+      List<String> routeArr = route.split('/');
+      List<String> keyArr = key.split('/');
+      if (routeArr.length != keyArr.length) return false;
+      for (int i = 0; i < routeArr.length; i++) {
+        if (routeArr[i].toLowerCase() == keyArr[i].toLowerCase() ||
+            keyArr[i].toLowerCase().startsWith(':')) {
+          if (keyArr[i].toLowerCase().startsWith(':')) {
+            compareMap['params'][keyArr[i].replaceFirst(':', '')] = routeArr[i];
           }
-          await res.response.close();
-          break;
+        } else {
+          return false;
         }
       }
-    } else {
-      res.status(HttpStatus.notFound).json({'error': 'method not found'});
-    }
+      return true;
+    }, orElse: () {
+      return null;
+    });
+    compareMap['route'] = matched;
+    return compareMap;
   }
 
-  void _handlePost(ServRequest req, ServResponse res) async {
-    List<Function(ServRequest, ServResponse)> selectedCallbacks =
-        router.posts.containsKey(req.path) ||
-                router.posts.containsKey('${req.path}/')
-            ? router.posts[req.path]
-            : null;
+  Future<void> _consumeOpenFileStreams(ServRequest req) async {
+    if (req.files.isNotEmpty) {
+      for (int i = 0; i < req.files.keys.length; i++) {
+        File file = File(req.files[req.files.keys.toList()[i]].filename);
+        SevrFile fileC = req.files[req.files.keys.toList()[i]];
+        if (!fileC.streamController.isClosed) {
+          await for (var data in fileC.streamController.stream) {
+            //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
 
-    if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
-      for (var func in selectedCallbacks) {
-        var result = await func(req, res);
-        print(result.runtimeType);
-        if (result is ServResponse) {
-          break;
+          }
         }
       }
-    } else {
-      res.status(HttpStatus.notFound).json({'error': 'method not found'});
     }
-  }
-
-  // void _handleDelete() {}
-
-  // void _handlePut() {}
-
-  void _handlePatch() {}
-
-  String parseUrlEncodedValuesToString(String keyVal) {
-    return null;
+    return;
   }
 }
 
