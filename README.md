@@ -18,10 +18,19 @@ import 'package:sevr/sevr.dart';
 main() {
   var serv = Sevr();
 
+  // get request
   serv.get('/test',[(req,res){
     return res.status(200).json({'status':'ok'});
   }]);
-  
+
+  // post request
+  serv.post('/post', [
+    (req, res) async {
+      print(req.body);
+      return res.status(200).json(req.body);
+    }
+  ]);
+
   serv.listen(3000,callback: (){
     print('Listening on ${3000}');
   });

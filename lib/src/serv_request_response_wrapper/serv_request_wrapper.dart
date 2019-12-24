@@ -1,27 +1,27 @@
+import 'dart:async';
 import 'dart:convert' as json_helper;
 import 'dart:io';
 
 ///wrapper for [HttpRequest]
 class ServRequest {
   HttpRequest request;
-
   Map<String, dynamic> body = {};
-
+  Map<String, dynamic> files = {};
   ServRequest(HttpRequest request) {
     this.request = request;
   }
 
-  ///The path of the [request] Uri
+  /// the uri/path for an endpoint
   String get path {
     return request.uri.path;
   }
 
-  ///information about [request] headers
+  /// request headers
   get headers {
     return request.headers;
   }
 
-  ///Getting [ContentType] of the [request]
+  /// type of request, e.g `application/json`
   String get type {
     return request.headers.contentType.value;
   }
@@ -30,9 +30,7 @@ class ServRequest {
 ///Wrapper for the [HttpRequest request.response]
 class ServResponse {
   HttpRequest request;
-
   Map<String, dynamic> locals = {};
-
   ServResponse(HttpRequest request) {
     this.request = request;
   }
@@ -51,7 +49,7 @@ class ServResponse {
     return this;
   }
 
-  ///Send Json data to be written as response body
+  /// Return data in json format. data = a map to be converted to json
   ServResponse json(Map<String, dynamic> data) {
     // print('you just called me');
     // print(data);
@@ -67,4 +65,12 @@ class ServResponse {
     response.headers.set(name, value);
     return this;
   }
+}
+
+class SevrFile {
+  StreamController streamController;
+  String filename;
+  String name;
+
+  SevrFile(this.name, this.filename, this.streamController);
 }

@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:sevr/src/build_data.dart';
+import 'package:sevr/src/mime/mime.dart';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
 import 'package:sevr/src/serv_router/serv_router.dart';
-import 'package:body_parser/body_parser.dart';
+import 'package:sevr/src/http_server/http_server.dart';
+import 'package:pedantic/pedantic.dart';
 
 class Sevr {
   String messageReturn = '';
@@ -19,7 +24,7 @@ class Sevr {
 
   Sevr._internal();
 
-  ///listens for connection on the specified port, ``port: port to listen, callback: function with message to print``
+  /// listens for connection on the specified port
   listen(int port,
       {Function callback,
       SecurityContext context,
@@ -36,10 +41,6 @@ class Sevr {
           InternetAddress.loopbackIPv4, port, context);
     }
 
-    if (callback != null) {
-      callback();
-    }
-
     this.port = port;
     this.host = InternetAddress.loopbackIPv4;
 
@@ -49,47 +50,132 @@ class Sevr {
     }
   }
 
-  call(HttpRequest request) async {
-    var parse = await parseBody(request);
-    print(parse.body);
-    // var convert = await request.transform(Utf8Decoder()).join();
+  dynamic call(HttpRequest request) async {
+    print(request.headers.contentType);
 
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
-    request.listen((onData) async {
-      Map<String, dynamic> jsonData = {};
+    String contentType = req.headers.contentType.toString();
+    Map<String, dynamic> jsonData = {};
+    dynamic downloadData = List<int>();
+    List<dynamic> tempOnData = List<int>();
 
-      switch (ServContentType(req.headers.contentType.toString())) {
-        case ServContentTypeEnum.ApplicationJson:
-          String s = String.fromCharCodes(onData);
+    if (contentType.contains('multipart/form-data')) {
+      contentType = 'multipart/form-data';
+    }
+
+    switch (ServContentType(contentType)) {
+      case ServContentTypeEnum.ApplicationJson:
+        StreamSubscription _sub;
+        _sub = request.listen((Uint8List onData) {
+          downloadData.addAll(onData);
+        }, onDone: () {
+          String s = String.fromCharCodes(downloadData);
           jsonData.addAll(json.decode(s));
           req.body = jsonData;
-          break;
 
-        case ServContentTypeEnum.ApplicationFormUrlEncoded:
-          String s = String.fromCharCodes(onData);
-          jsonData.addAll(json.decode(s));
-          print(s);
-          break;
+          switch (request.method) {
+            case 'GET':
+              _handleGet(req, res);
+              break;
 
-        default:
-          //TODO: handle other content types
-          print(req.headers.contentType.toString());
-      }
-    }, onDone: () {
-      switch (request.method) {
-        case 'GET':
-          _handleGet(req, res);
-          break;
+            case 'POST':
+              _handlePost(req, res);
+              break;
+            default:
+          }
+        });
 
-        case 'POST':
-          _handlePost(req, res);
-          break;
+        break;
 
-        default:
-          _handleGet(req, res);
-      }
-    });
+      case ServContentTypeEnum.MultipartFormData:
+        String boundary = request.headers.contentType.parameters['boundary'];
+        List fileKeys = [];
+
+        request.transform(MimeMultipartTransformer(boundary)).listen(
+            (MimeMultipart onData) async {
+          HttpMultipartFormData formDataObject =
+              HttpMultipartFormData.parse(onData);
+          if (formDataObject.isBinary ||
+              formDataObject.contentDisposition.parameters
+                  .containsKey('filename')) {
+            print('isBinary');
+            print('${formDataObject.contentDisposition.parameters}');
+            if (!fileKeys.contains(
+                formDataObject.contentDisposition.parameters['name'])) {
+              fileKeys
+                  .add(formDataObject.contentDisposition.parameters['name']);
+              StreamController _fileStreamController = StreamController();
+              SevrFile requestFileObject = SevrFile(
+                  formDataObject.contentDisposition.parameters['name'],
+                  formDataObject.contentDisposition.parameters['filename'],
+                  _fileStreamController);
+              req.files[formDataObject.contentDisposition.parameters['name']] =
+                  requestFileObject;
+            }
+
+            StreamController _fcont = req
+                .files[formDataObject.contentDisposition.parameters['name']]
+                .streamController;
+
+            unawaited(
+              _fcont.sink.addStream(formDataObject).then(
+                (dynamic c) async {
+                  return _fcont.close();
+                },
+              ),
+            );
+          } else {
+            // formDataObject.listen((onData) {
+            jsonData.addAll({
+              formDataObject.contentDisposition.parameters['name']:
+                  await formDataObject.join()
+            });
+            req.body = jsonData;
+            // });
+          }
+        }, onDone: () {});
+        Future.delayed(Duration.zero, () {
+          switch (request.method) {
+            case 'GET':
+              _handleGet(req, res);
+              break;
+
+            case 'POST':
+              _handlePost(req, res);
+              break;
+          }
+        });
+        break;
+
+      case ServContentTypeEnum.ApplicationFormUrlEncoded:
+        // get data from form
+        var body = await request
+            .transform(utf8.decoder.cast<Uint8List, dynamic>())
+            .join();
+
+        Map<String, dynamic> result = {};
+
+        buildMapFromUri(result, body);
+
+        req.body = result;
+
+        Future.delayed(Duration.zero, () {
+          switch (request.method) {
+            case 'GET':
+              _handleGet(req, res);
+              break;
+
+            case 'POST':
+              _handlePost(req, res);
+              break;
+          }
+        });
+        break;
+
+      default:
+        break;
+    }
   }
 
   ///create a `get` request, route: uri, callbacks: list of callback functions to run.
@@ -116,6 +202,20 @@ class Sevr {
         var result = await func(req, res);
         print(result.runtimeType);
         if (result is ServResponse) {
+          if (req.files.isNotEmpty) {
+            for (int i = 0; i < req.files.keys.length; i++) {
+              File file = File(req.files[req.files.keys.toList()[i]].filename);
+              StreamController fileC =
+                  req.files[req.files.keys.toList()[i]].streamController;
+              if (!fileC.isClosed) {
+                await for (var data in req.files[req.files.keys.toList()[i]]
+                    .streamController.stream) {
+                  //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
+                }
+              }
+            }
+          }
+          await res.response.close();
           break;
         }
       }
@@ -148,5 +248,14 @@ class Sevr {
 
   // void _handlePut() {}
 
-  // void _handlePatch() {}
+  void _handlePatch() {}
+
+  String parseUrlEncodedValuesToString(String keyVal) {
+    return null;
+  }
+}
+
+class UpperCase extends Converter<String, String> {
+  @override
+  String convert(String input) => input.toUpperCase();
 }
