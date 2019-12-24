@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:sevr/src/build_data.dart';
 import 'package:sevr/src/mime/mime.dart';
@@ -40,7 +40,6 @@ class Sevr {
       server = await HttpServer.bindSecure(
           InternetAddress.loopbackIPv4, port, context);
     }
-    
 
     this.port = port;
     this.host = InternetAddress.loopbackIPv4;
@@ -245,9 +244,9 @@ class Sevr {
     }
   }
 
-  void _handleDelete() {}
+  // void _handleDelete() {}
 
-  void _handlePut() {}
+  // void _handlePut() {}
 
   void _handlePatch() {}
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert' as json_helper;
 import 'dart:io';
 
+///wrapper for [HttpRequest]
 class ServRequest {
   HttpRequest request;
   Map<String, dynamic> body = {};
@@ -26,6 +27,7 @@ class ServRequest {
   }
 }
 
+///Wrapper for the [HttpRequest request.response]
 class ServResponse {
   HttpRequest request;
   Map<String, dynamic> locals = {};
@@ -41,6 +43,7 @@ class ServResponse {
     return this.request.response;
   }
 
+  ///Set [response.statusCode]
   ServResponse status(int statusCode) {
     response.statusCode = statusCode;
     return this;
