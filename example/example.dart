@@ -1,17 +1,26 @@
+import 'dart:convert';
+
 import 'package:sevr/sevr.dart';
 
 main() {
   var serv = Sevr();
 
-  //so like express we can create controller,middleware classes etc and then put them in a list and then pass them into the router methods
+  //We can create controller,middleware classes etc, put them in a list and pass them into the router methods
   serv.get('/test', [
     (ServRequest req, ServResponse res) {
       return res.status(200).json({'status': 'ok'});
     }
   ]);
 
-  serv.listen(3000, callback: () {
-    print('Listening on ${3000}');
+  serv.post('/post', [
+    (ServRequest req, ServResponse res) async {
+      print(req.body);
+      return res.status(200).json(req.body);
+    }
+  ]);
+
+  serv.listen(4000, callback: () {
+    print('Listening on ${4000}');
   });
 }
 
