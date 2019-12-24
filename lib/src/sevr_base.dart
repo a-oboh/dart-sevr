@@ -1,9 +1,8 @@
-// TODO: Put public facing types in this file.
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:sevr/src/build_data.dart';
 import 'package:sevr/src/mime/mime.dart';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
@@ -25,7 +24,7 @@ class Sevr {
 
   Sevr._internal();
 
-  //listens for connection on the specified port
+  /// listens for connection on the specified port
   listen(int port,
       {Function callback,
       SecurityContext context,
@@ -52,7 +51,7 @@ class Sevr {
     }
   }
 
-  call(HttpRequest request) async {
+  dynamic call(HttpRequest request) async {
     print(request.headers.contentType);
 
     ServRequest req = ServRequest(request);
@@ -61,6 +60,7 @@ class Sevr {
     Map<String, dynamic> jsonData = {};
     dynamic downloadData = List<int>();
     List<dynamic> tempOnData = List<int>();
+
     if (contentType.contains('multipart/form-data')) {
       contentType = 'multipart/form-data';
     }
@@ -79,14 +79,20 @@ class Sevr {
             case 'GET':
               _handleGet(req, res);
               break;
+
+            case 'POST':
+              _handlePost(req, res);
+              break;
             default:
           }
         });
 
         break;
+
       case ServContentTypeEnum.MultipartFormData:
         String boundary = request.headers.contentType.parameters['boundary'];
         List fileKeys = [];
+
         request.transform(MimeMultipartTransformer(boundary)).listen(
             (MimeMultipart onData) async {
           HttpMultipartFormData formDataObject =
@@ -108,13 +114,18 @@ class Sevr {
               req.files[formDataObject.contentDisposition.parameters['name']] =
                   requestFileObject;
             }
+
             StreamController _fcont = req
                 .files[formDataObject.contentDisposition.parameters['name']]
                 .streamController;
+
             unawaited(
-                _fcont.sink.addStream(formDataObject).then((dynamic c) async {
-              return _fcont.close();
-            }));
+              _fcont.sink.addStream(formDataObject).then(
+                (dynamic c) async {
+                  return _fcont.close();
+                },
+              ),
+            );
           } else {
             // formDataObject.listen((onData) {
             jsonData.addAll({
@@ -130,17 +141,54 @@ class Sevr {
             case 'GET':
               _handleGet(req, res);
               break;
+
+            case 'POST':
+              _handlePost(req, res);
+              break;
           }
         });
         break;
 
       case ServContentTypeEnum.ApplicationFormUrlEncoded:
-        // Yet to be implememnted
+        // get data from form
+        var body = await request
+            .transform(utf8.decoder.cast<Uint8List, dynamic>())
+            .join();
+
+        Map<String, dynamic> result = {};
+
+        buildMapFromUri(result, body);
+
+        req.body = result;
+
+        Future.delayed(Duration.zero, () {
+          switch (request.method) {
+            case 'GET':
+              _handleGet(req, res);
+              break;
+
+            case 'POST':
+              _handlePost(req, res);
+              break;
+          }
+        });
         break;
 
       default:
         break;
     }
+  }
+
+  ///create a `get` request, route: uri, callbacks: list of callback functions to run.
+  get(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.gets[route] = callbacks;
+  }
+
+  ///create a `post` request, route: uri, callbacks: list of callback functions to run.
+  post(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.posts[route] = callbacks;
   }
 
   void _handleGet(ServRequest req, ServResponse res) async {
@@ -149,6 +197,7 @@ class Sevr {
                 router.gets.containsKey('${req.path}/')
             ? router.gets[req.path]
             : null;
+
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);
@@ -163,7 +212,6 @@ class Sevr {
                 await for (var data in req.files[req.files.keys.toList()[i]]
                     .streamController.stream) {
                   //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-
                 }
               }
             }
@@ -177,12 +225,25 @@ class Sevr {
     }
   }
 
-  get(String route,
-      List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.gets[route] = callbacks;
-  }
+  void _handlePost(ServRequest req, ServResponse res) async {
+    List<Function(ServRequest, ServResponse)> selectedCallbacks =
+        router.posts.containsKey(req.path) ||
+                router.posts.containsKey('${req.path}/')
+            ? router.posts[req.path]
+            : null;
 
-  void _handlePost(HttpRequest request) async {}
+    if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
+      for (var func in selectedCallbacks) {
+        var result = await func(req, res);
+        print(result.runtimeType);
+        if (result is ServResponse) {
+          break;
+        }
+      }
+    } else {
+      res.status(HttpStatus.notFound).json({'error': 'method not found'});
+    }
+  }
 
   void _handleDelete() {}
 
@@ -193,4 +254,9 @@ class Sevr {
   String parseUrlEncodedValuesToString(String keyVal) {
     return null;
   }
+}
+
+class UpperCase extends Converter<String, String> {
+  @override
+  String convert(String input) => input.toUpperCase();
 }
