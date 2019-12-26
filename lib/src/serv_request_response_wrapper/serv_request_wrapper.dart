@@ -62,6 +62,14 @@ class ServResponse {
     return this;
   }
 
+  Future<ServResponse> sendFile(File file, ContentType contentType)async{
+    response.headers.contentType = contentType;
+    await response.addStream(file.readAsBytes().asStream());
+
+
+    return this;
+  }
+
   ServResponse close(){
     response.close();
     return this;

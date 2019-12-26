@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sevr/sevr.dart';
 
 main() {
@@ -10,9 +12,16 @@ main() {
     }
   ]);
 
+  serv.get('/html', [
+    (ServRequest req, ServResponse res){
+      return res.status(200).sendFile(File('./example.html'), ContentType.html);
+    }
+  ]);
+
   serv.listen(3000, callback: () {
     print('Listening on ${3000}');
   });
+  
 }
 
 //  controllerClassOne(req,res)async{
