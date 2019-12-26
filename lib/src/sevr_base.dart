@@ -10,6 +10,8 @@ import 'package:sevr/src/serv_router/serv_router.dart';
 import 'package:sevr/src/http_server/http_server.dart';
 import 'package:pedantic/pedantic.dart';
 
+import 'serv_content_types/serv_content_types.dart';
+
 class Sevr {
   String messageReturn = '';
   static final Sevr _serv = Sevr._internal();
@@ -51,8 +53,6 @@ class Sevr {
   }
 
   dynamic call(HttpRequest request) async {
-    print(request.headers.contentType);
-
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
     String contentType = req.headers.contentType.toString();
@@ -92,8 +92,8 @@ class Sevr {
           if (formDataObject.isBinary ||
               formDataObject.contentDisposition.parameters
                   .containsKey('filename')) {
-            print('isBinary');
-            print('${formDataObject.contentDisposition.parameters}');
+            // print('isBinary');
+            // print('${formDataObject.contentDisposition.parameters}');
             if (!fileKeys.contains(
                 formDataObject.contentDisposition.parameters['name'])) {
               fileKeys
@@ -124,9 +124,9 @@ class Sevr {
               formDataObject.contentDisposition.parameters['name']:
                   await formDataObject.join()
             });
-            print(':;;;;;;;;;;;');
+            // print(':;;;;;;;;;;;');
             req.body = jsonData;
-            print(jsonData);
+            // print(jsonData);
             // });
           }
         }, onDone: () {});
@@ -152,17 +152,24 @@ class Sevr {
         });
         break;
 
+      case ServContentTypeEnum.TextHtml:
+        request.listen((onData) {
+          print(String.fromCharCodes(onData));
+        });
+        // print('bro html');
+
+        Future.delayed(Duration.zero, () {
+          _handleRequests(req, res, request.method);
+        });
+        break;
+
       default:
         break;
     }
   }
 
-  Map get getAllRoutes{
-    return {
-      'GET': router.gets,
-      'POST':router.posts
-
-    };
+  Map get getAllRoutes {
+    return {'GET': router.gets, 'POST': router.posts};
   }
 
   ///create a `get` request, route: uri, callbacks: list of callback functions to run.
@@ -177,12 +184,13 @@ class Sevr {
     this.router.posts[route] = callbacks;
   }
 
-  void _handleRequests(ServRequest req, ServResponse res, String reqType) async {
+  void _handleRequests(
+      ServRequest req, ServResponse res, String reqType) async {
     Map reqTypeMap = getAllRoutes[reqType];
     String path = req.path.endsWith('/')
         ? req.path.replaceRange(req.path.length - 1, req.path.length, '')
         : req.path;
-    print(path);
+    // print(path);
     Map mapRes = getRouteParams(path, router.gets);
     Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
     req.params = params.cast<String, String>() ?? {};
@@ -195,7 +203,7 @@ class Sevr {
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);
-        print(result.runtimeType);
+        // print(result.runtimeType);
         if (result is ServResponse) {
           await _consumeOpenFileStreams(req);
           await res.close();

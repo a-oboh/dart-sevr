@@ -5,10 +5,10 @@ import 'dart:io';
 ///wrapper for [HttpRequest]
 class ServRequest {
   HttpRequest request;
- Map<String,dynamic> body = {};
- Map<String,dynamic> files = {};
- Map<String,String> params = {};
-  ServRequest(HttpRequest request){
+  Map<String, dynamic> body = {};
+  Map<String, dynamic> files = {};
+  Map<String, String> params = {};
+  ServRequest(HttpRequest request) {
     this.request = request;
   }
 
@@ -57,12 +57,23 @@ class ServResponse {
     response
       ..headers.contentType = ContentType.json
       ..write(json_helper.json.encode(data));
-      // ..close();
+    // ..close();
 
     return this;
   }
 
-  ServResponse close(){
+  /// Serve html file
+  Future<ServResponse> sendFile(File returnFile) async {
+    print(returnFile.path);
+    // if (await returnFile.exists()) {
+    response.headers.contentType = ContentType.html;
+    await response.addStream(returnFile.openRead());
+
+    return this;
+    // }
+  }
+
+  ServResponse close() {
     response.close();
     return this;
   }

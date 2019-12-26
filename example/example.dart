@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:sevr/sevr.dart';
 
@@ -6,6 +7,14 @@ main() {
   var serv = Sevr();
 
   //We can create controller,middleware classes etc, put them in a list and pass them into the router methods
+  serv.get('/file', [
+    (ServRequest req, ServResponse res) {
+      File targetFile = File('example/web/index.html');
+      res.status(200);
+      return res.sendFile(targetFile);
+    }
+  ]);
+
   serv.get('/test', [
     (ServRequest req, ServResponse res) {
       return res.status(200).json({'status': 'ok'});
@@ -20,7 +29,7 @@ main() {
   ]);
 
   serv.listen(4000, callback: () {
-    print('Listening on ${4000}');
+    print('Listening on port: ${4000}');
   });
 }
 
