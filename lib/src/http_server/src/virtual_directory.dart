@@ -253,7 +253,6 @@ class VirtualDirectory {
             }
           }
         }
-
         response.headers.set(HttpHeaders.contentLengthHeader, length);
         if (request.method == 'HEAD') {
           response.close();
