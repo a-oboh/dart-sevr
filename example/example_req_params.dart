@@ -12,12 +12,6 @@ main() {
     }
   ]);
 
-  serv.get('/html', [
-    (ServRequest req, ServResponse res){
-      return res.status(200).sendFile(File('./example.html'), ContentType.html);
-    }
-  ]);
-
   serv.listen(3000, callback: () {
     print('Listening on ${3000}');
   });
