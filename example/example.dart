@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:sevr/sevr.dart';
+import 'package:path/path.dart' as p;
 
 main() {
   var serv = Sevr();
@@ -8,7 +9,7 @@ main() {
   //We can create controller,middleware classes etc, put them in a list and pass them into the router methods
   serv.get('/file', [
     (ServRequest req, ServResponse res) {
-      return res.status(200).sendFile('./index.html');
+      return res.status(200).sendFile(p.absolute('web/index.html'));
     }
   ]);
 
