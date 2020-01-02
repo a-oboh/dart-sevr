@@ -42,7 +42,7 @@ class Router {
     posts[route] = callbacks;
   }
 
-   patch(String route,
+  patch(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     patchs[route] = callbacks;
   }
@@ -52,37 +52,37 @@ class Router {
     puts[route] = callbacks;
   }
 
- delete(String route,
+  delete(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     deletes[route] = callbacks;
   }
 
-   copy(String route,
+  copy(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     copys[route] = callbacks;
   }
 
-   head(String route,
+  head(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     heads[route] = callbacks;
   }
 
-   options(String route,
+  options(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     optionss[route] = callbacks;
   }
 
-   link(String route,
+  link(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     links[route] = callbacks;
   }
 
-   unlink(String route,
+  unlink(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     unlinks[route] = callbacks;
   }
 
-   purge(String route,
+  purge(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     purges[route] = callbacks;
   }
@@ -107,7 +107,7 @@ class Router {
     views[route] = callbacks;
   }
 
-  void join(Router rter){
+  void join(Router rter) {
     this.gets.addAll(rter.gets);
     this.posts.addAll(rter.posts);
     this.patchs.addAll(rter.patchs);
@@ -124,5 +124,4 @@ class Router {
     this.propfinds.addAll(rter.propfinds);
     this.views.addAll(rter.views);
   }
-
 }

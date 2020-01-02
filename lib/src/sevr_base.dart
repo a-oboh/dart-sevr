@@ -158,9 +158,9 @@ class Sevr {
         break;
 
       case ServContentTypeEnum.TextHtml:
-        request.listen((onData) {
-          print(String.fromCharCodes(onData));
-        });
+        // request.listen((onData) {
+        //   print(String.fromCharCodes(onData));
+        // });
         // print('bro html');
 
         Future.delayed(Duration.zero, () {
@@ -297,7 +297,7 @@ class Sevr {
     Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
     req.params = params.cast<String, String>() ?? {};
     String matched = mapRes['route'];
-    print(matched);
+    // print(matched);
     List<Function(ServRequest, ServResponse)> selectedCallbacks =
         reqTypeMap.containsKey(path)
             ? reqTypeMap[path]
@@ -316,7 +316,7 @@ class Sevr {
       await _consumeOpenFileStreams(req);
       for (SevrDir directory in servDirs) {
         String filePath = '${directory.dir.path}${req.path}';
-        print(filePath);
+        // print(filePath);
         if (await File(filePath).exists()) {
           (await res.status(HttpStatus.ok).sendFile(filePath)).close();
           return;
@@ -326,7 +326,7 @@ class Sevr {
       res
           .status(HttpStatus.notFound)
           .json({'error': 'method not found'}).close();
-      print(res.response.connectionInfo);
+      // print(res.response.connectionInfo);
     }
   }
 

@@ -18,21 +18,35 @@ import 'package:sevr/sevr.dart';
 main() {
   var serv = Sevr();
 
-  // get request
-  serv.get('/test',[(req,res){
-    return res.status(200).json({'status':'ok'});
-  }]);
+  //first notify **sevr** of your directory of static files
+  serv.use(Sevr.static('./web'));
 
-  // post request
+  //create controller,middleware classes etc, put them in a list and pass them into the router methods
+
+  //serve files from the port
+  serv.get('/file', [
+    (ServRequest req, ServResponse res) {
+      return res.status(200).sendFile(p.absolute('web/index.html'));
+    }
+  ]);
+
+  // get request that returns json
+  serv.get('/test', [
+    (ServRequest req, ServResponse res) {
+      return res.status(200).json({'status': 'ok'});
+    }
+  ]);
+
+  //post request
   serv.post('/post', [
-    (req, res) async {
-      print(req.body);
+    (ServRequest req, ServResponse res) async {
       return res.status(200).json(req.body);
     }
   ]);
 
-  serv.listen(3000,callback: (){
-    print('Listening on ${3000}');
+  //create server connection
+  serv.listen(4000, callback: () {
+    print('Listening on port: ${4000}');
   });
 }
 ```

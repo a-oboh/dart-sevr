@@ -3,26 +3,28 @@ import 'package:dart2_constant/convert.dart';
 /// convert ints and floats to numbers
 getValue(String value) {
   try {
-    num numValue = num.parse(value);
-    if (!numValue.isNaN)
+    var numValue = num.parse(value);
+    if (!numValue.isNaN) {
       return numValue;
-    else
+    } else {
       return value;
+    }
   } on FormatException {
-    if (value.startsWith('[') && value.endsWith(']'))
+    if (value.startsWith('[') && value.endsWith(']')) {
       return json.decode(value);
-    else if (value.startsWith('{') && value.endsWith('}'))
+    } else if (value.startsWith('{') && value.endsWith('}')) {
       return json.decode(value);
-    else if (value.trim().toLowerCase() == 'null')
+    } else if (value.trim().toLowerCase() == 'null') {
       return null;
-    else
+    } else {
       return value;
+    }
   }
 }
 
 /// Converts data from urlencoded to map
 buildMapFromUri(Map map, String body) {
-  RegExp parseArrayRgx = new RegExp(r'^(.+)\[\]$');
+  var parseArrayRgx = RegExp(r'^(.+)\[\]$');
 
   for (String keyValuePair in body.split('&')) {
     if (keyValuePair.contains('=')) {
@@ -53,9 +55,11 @@ buildMapFromUri(Map map, String body) {
             targetMap[keys[i]] = getValue(value);
           }
         }
-      } else
+      } else {
         map[key] = getValue(value);
-    } else
+      }
+    } else {
       map[Uri.decodeQueryComponent(keyValuePair)] = true;
+    }
   }
 }
