@@ -21,7 +21,7 @@ class ServRequest {
   }
 
   /// request headers
-  get headers {
+  HttpHeaders get headers {
     return request.headers;
   }
 
