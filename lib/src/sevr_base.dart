@@ -10,12 +10,19 @@ import 'package:sevr/src/serv_router/serv_router.dart';
 import 'package:sevr/src/http_server/http_server.dart';
 import 'package:pedantic/pedantic.dart';
 
+import 'serv_content_types/serv_content_types.dart';
+
 class Sevr {
   String messageReturn = '';
   static final Sevr _serv = Sevr._internal();
   final Router router = Router();
   int port;
   var host;
+  List<SevrDir> servDirs = [];
+
+  static SevrDir static(String dir) {
+    return SevrDir(dir);
+  }
 
   //Exposes a singleton Instance of the class through out its use
   factory Sevr() {
@@ -51,8 +58,6 @@ class Sevr {
   }
 
   dynamic call(HttpRequest request) async {
-    print(request.headers.contentType);
-
     ServRequest req = ServRequest(request);
     ServResponse res = ServResponse(request);
     String contentType = req.headers.contentType.toString();
@@ -71,19 +76,12 @@ class Sevr {
           downloadData.addAll(onData);
         }, onDone: () {
           String s = String.fromCharCodes(downloadData);
-          jsonData.addAll(json.decode(s));
-          req.body = jsonData;
-
-          switch (request.method) {
-            case 'GET':
-              _handleGet(req, res);
-              break;
-
-            case 'POST':
-              _handlePost(req, res);
-              break;
-            default:
+          if (s.isNotEmpty) {
+            jsonData.addAll(json.decode(s));
+            req.body = jsonData;
           }
+
+          _handleRequests(req, res, request.method);
         });
 
         break;
@@ -99,8 +97,8 @@ class Sevr {
           if (formDataObject.isBinary ||
               formDataObject.contentDisposition.parameters
                   .containsKey('filename')) {
-            print('isBinary');
-            print('${formDataObject.contentDisposition.parameters}');
+            // print('isBinary');
+            // print('${formDataObject.contentDisposition.parameters}');
             if (!fileKeys.contains(
                 formDataObject.contentDisposition.parameters['name'])) {
               fileKeys
@@ -131,20 +129,14 @@ class Sevr {
               formDataObject.contentDisposition.parameters['name']:
                   await formDataObject.join()
             });
+            // print(':;;;;;;;;;;;');
             req.body = jsonData;
+            // print(jsonData);
             // });
           }
         }, onDone: () {});
         Future.delayed(Duration.zero, () {
-          switch (request.method) {
-            case 'GET':
-              _handleGet(req, res);
-              break;
-
-            case 'POST':
-              _handlePost(req, res);
-              break;
-          }
+          _handleRequests(req, res, request.method);
         });
         break;
 
@@ -161,21 +153,47 @@ class Sevr {
         req.body = result;
 
         Future.delayed(Duration.zero, () {
-          switch (request.method) {
-            case 'GET':
-              _handleGet(req, res);
-              break;
+          _handleRequests(req, res, request.method);
+        });
+        break;
 
-            case 'POST':
-              _handlePost(req, res);
-              break;
-          }
+      case ServContentTypeEnum.TextHtml:
+        request.listen((onData) {
+          print(String.fromCharCodes(onData));
+        });
+        // print('bro html');
+
+        Future.delayed(Duration.zero, () {
+          _handleRequests(req, res, request.method);
         });
         break;
 
       default:
+        Future.delayed(Duration.zero, () {
+          _handleRequests(req, res, request.method);
+        });
         break;
     }
+  }
+
+  Map get getAllRoutes {
+    return {
+      'GET': router.gets,
+      'POST': router.posts,
+      'PATCH': router.patchs,
+      'PUT': router.puts,
+      'DELETE': router.deletes,
+      'COPY': router.copys,
+      'HEAD': router.heads,
+      'OPTIONS': router.optionss,
+      'LINK': router.links,
+      'UNLINK': router.unlinks,
+      'PURGE': router.purges,
+      'LOCK': router.locks,
+      'UNLOCK': router.unlocks,
+      'PROPFIND': router.propfinds,
+      'VIEW': router.views
+    };
   }
 
   ///create a `get` request, route: uri, callbacks: list of callback functions to run.
@@ -190,68 +208,188 @@ class Sevr {
     this.router.posts[route] = callbacks;
   }
 
-  void _handleGet(ServRequest req, ServResponse res) async {
-    List<Function(ServRequest, ServResponse)> selectedCallbacks =
-        router.gets.containsKey(req.path) ||
-                router.gets.containsKey('${req.path}/')
-            ? router.gets[req.path]
-            : null;
+  ///create a `patch` request, route: uri, callbacks: list of callback functions to run.
+  patch(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.patchs[route] = callbacks;
+  }
 
+  ///create a `put` request, route: uri, callbacks: list of callback functions to run.
+  put(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.puts[route] = callbacks;
+  }
+
+  ///create a `delete` request, route: uri, callbacks: list of callback functions to run.
+  delete(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.deletes[route] = callbacks;
+  }
+
+  ///create a `copy` request, route: uri, callbacks: list of callback functions to run.
+  copy(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.copys[route] = callbacks;
+  }
+
+  ///create a `head` request, route: uri, callbacks: list of callback functions to run.
+  head(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.heads[route] = callbacks;
+  }
+
+  ///create a `options` request, route: uri, callbacks: list of callback functions to run.
+  options(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.optionss[route] = callbacks;
+  }
+
+  ///create a `link` request, route: uri, callbacks: list of callback functions to run.
+  link(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.links[route] = callbacks;
+  }
+
+  ///create a `unlink` request, route: uri, callbacks: list of callback functions to run.
+  unlink(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.unlinks[route] = callbacks;
+  }
+
+  ///create a `purge` request, route: uri, callbacks: list of callback functions to run.
+  purge(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.purges[route] = callbacks;
+  }
+
+  ///create a `lock` request, route: uri, callbacks: list of callback functions to run.
+  lock(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.locks[route] = callbacks;
+  }
+
+  ///create a `unlock` request, route: uri, callbacks: list of callback functions to run.
+  unlock(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.unlocks[route] = callbacks;
+  }
+
+  ///create a `propfind` request, route: uri, callbacks: list of callback functions to run.
+  propfind(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.propfinds[route] = callbacks;
+  }
+
+  ///create a `view` request, route: uri, callbacks: list of callback functions to run.
+  view(String route,
+      List<Function(ServRequest req, ServResponse res)> callbacks) {
+    this.router.views[route] = callbacks;
+  }
+
+  void _handleRequests(
+      ServRequest req, ServResponse res, String reqType) async {
+    Map reqTypeMap = getAllRoutes[reqType];
+    String path = req.path.endsWith('/')
+        ? req.path.replaceRange(req.path.length - 1, req.path.length, '')
+        : req.path;
+    // print(path);
+    Map mapRes = getRouteParams(path, router.gets);
+    Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
+    req.params = params.cast<String, String>() ?? {};
+    String matched = mapRes['route'];
+    print(matched);
+    List<Function(ServRequest, ServResponse)> selectedCallbacks =
+        reqTypeMap.containsKey(path)
+            ? reqTypeMap[path]
+            : matched != null ? reqTypeMap[matched] : null;
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);
-        print(result.runtimeType);
+        // print(result.runtimeType);
         if (result is ServResponse) {
-          if (req.files.isNotEmpty) {
-            for (int i = 0; i < req.files.keys.length; i++) {
-              File file = File(req.files[req.files.keys.toList()[i]].filename);
-              StreamController fileC =
-                  req.files[req.files.keys.toList()[i]].streamController;
-              if (!fileC.isClosed) {
-                await for (var data in req.files[req.files.keys.toList()[i]]
-                    .streamController.stream) {
-                  //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-                }
-              }
-            }
+          await _consumeOpenFileStreams(req);
+          await res.close();
+          break;
+        }
+      }
+    } else {
+      await _consumeOpenFileStreams(req);
+      for (SevrDir directory in servDirs) {
+        String filePath = '${directory.dir.path}${req.path}';
+        print(filePath);
+        if (await File(filePath).exists()) {
+          (await res.status(HttpStatus.ok).sendFile(filePath)).close();
+          return;
+        }
+      }
+
+      res
+          .status(HttpStatus.notFound)
+          .json({'error': 'method not found'}).close();
+      print(res.response.connectionInfo);
+    }
+  }
+
+  Map<String, dynamic> getRouteParams(String route, Map<String, List> query) {
+    Map<String, dynamic> compareMap = {'params': {}, 'route': null};
+    String matched = query.keys.firstWhere((String key) {
+      List<String> routeArr = route.split('/');
+      List<String> keyArr = key.split('/');
+      if (routeArr.length != keyArr.length) return false;
+      for (int i = 0; i < routeArr.length; i++) {
+        if (routeArr[i].toLowerCase() == keyArr[i].toLowerCase() ||
+            keyArr[i].toLowerCase().startsWith(':')) {
+          if (keyArr[i].toLowerCase().startsWith(':')) {
+            compareMap['params'][keyArr[i].replaceFirst(':', '')] = routeArr[i];
           }
-          await res.response.close();
-          break;
+        } else {
+          return false;
         }
       }
-    } else {
-      res.status(HttpStatus.notFound).json({'error': 'method not found'});
-    }
+      return true;
+    }, orElse: () {
+      return null;
+    });
+    compareMap['route'] = matched;
+    return compareMap;
   }
 
-  void _handlePost(ServRequest req, ServResponse res) async {
-    List<Function(ServRequest, ServResponse)> selectedCallbacks =
-        router.posts.containsKey(req.path) ||
-                router.posts.containsKey('${req.path}/')
-            ? router.posts[req.path]
-            : null;
+  Future<void> _consumeOpenFileStreams(ServRequest req) async {
+    if (req.files.isNotEmpty) {
+      for (int i = 0; i < req.files.keys.length; i++) {
+        File file = File(req.files[req.files.keys.toList()[i]].filename);
+        SevrFile fileC = req.files[req.files.keys.toList()[i]];
+        if (!fileC.streamController.isClosed) {
+          await for (var data in fileC.streamController.stream) {
+            //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
 
-    if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
-      for (var func in selectedCallbacks) {
-        var result = await func(req, res);
-        print(result.runtimeType);
-        if (result is ServResponse) {
-          break;
+          }
         }
       }
-    } else {
-      res.status(HttpStatus.notFound).json({'error': 'method not found'});
     }
+    return;
   }
 
-  // void _handleDelete() {}
+  use(dynamic obj) {
+    switch (obj.runtimeType) {
+      case SevrDir:
+        servDirs.add(obj);
+        break;
 
-  // void _handlePut() {}
+      case Router:
+        this.router.join(obj);
+        break;
 
-  void _handlePatch() {}
+        break;
+      default:
+    }
+  }
+}
 
-  String parseUrlEncodedValuesToString(String keyVal) {
-    return null;
+class SevrDir {
+  Directory dir;
+  SevrDir(String dirString) {
+    this.dir = Directory(dirString);
   }
 }
 

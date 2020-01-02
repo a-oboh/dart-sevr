@@ -1,26 +1,32 @@
-import 'dart:convert';
-
+import 'dart:io';
 import 'package:sevr/sevr.dart';
+import 'package:path/path.dart' as p;
 
 main() {
   var serv = Sevr();
+  serv.use(Sevr.static('./web'));
 
   //We can create controller,middleware classes etc, put them in a list and pass them into the router methods
+  serv.get('/file', [
+    (ServRequest req, ServResponse res) {
+      return res.status(200).sendFile(p.absolute('web/index.html'));
+    }
+  ]);
+
   serv.get('/test', [
-    (req, res) {
+    (ServRequest req, ServResponse res) {
       return res.status(200).json({'status': 'ok'});
     }
   ]);
 
   serv.post('/post', [
-    (req, res) async {
-      print(req.body);
+    (ServRequest req, ServResponse res) async {
       return res.status(200).json(req.body);
     }
   ]);
 
   serv.listen(4000, callback: () {
-    print('Listening on ${4000}');
+    print('Listening on port: ${4000}');
   });
 }
 
