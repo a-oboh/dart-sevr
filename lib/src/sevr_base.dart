@@ -32,7 +32,7 @@ class Sevr {
   Sevr._internal();
 
   /// listens for connection on the specified port
-  listen(int port,
+  dynamic listen(int port,
       {Function callback,
       SecurityContext context,
       String messageReturn}) async {
@@ -49,7 +49,7 @@ class Sevr {
     }
 
     this.port = port;
-    this.host = InternetAddress.loopbackIPv4;
+    host = InternetAddress.loopbackIPv4;
 
     await for (var request in server) {
       //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
@@ -58,12 +58,12 @@ class Sevr {
   }
 
   dynamic call(HttpRequest request) async {
-    ServRequest req = ServRequest(request);
-    ServResponse res = ServResponse(request);
-    String contentType = req.headers.contentType.toString();
-    Map<String, dynamic> jsonData = {};
-    dynamic downloadData = List<int>();
-    List<dynamic> tempOnData = List<int>();
+    var req = ServRequest(request);
+    var res = ServResponse(request);
+    var contentType = req.headers.contentType.toString();
+    var jsonData = {};
+    dynamic downloadData = [];
+    List<dynamic> tempOnData = [];
 
     if (contentType.contains('multipart/form-data')) {
       contentType = 'multipart/form-data';
@@ -75,7 +75,7 @@ class Sevr {
         _sub = request.listen((Uint8List onData) {
           downloadData.addAll(onData);
         }, onDone: () {
-          String s = String.fromCharCodes(downloadData);
+          var s = String.fromCharCodes(downloadData);
           if (s.isNotEmpty) {
             jsonData.addAll(json.decode(s));
             req.body = jsonData;
@@ -87,13 +87,12 @@ class Sevr {
         break;
 
       case ServContentTypeEnum.MultipartFormData:
-        String boundary = request.headers.contentType.parameters['boundary'];
-        List fileKeys = [];
+        var boundary = request.headers.contentType.parameters['boundary'];
+        var fileKeys = [];
 
         request.transform(MimeMultipartTransformer(boundary)).listen(
             (MimeMultipart onData) async {
-          HttpMultipartFormData formDataObject =
-              HttpMultipartFormData.parse(onData);
+          var formDataObject = HttpMultipartFormData.parse(onData);
           if (formDataObject.isBinary ||
               formDataObject.contentDisposition.parameters
                   .containsKey('filename')) {
@@ -103,8 +102,8 @@ class Sevr {
                 formDataObject.contentDisposition.parameters['name'])) {
               fileKeys
                   .add(formDataObject.contentDisposition.parameters['name']);
-              StreamController _fileStreamController = StreamController();
-              SevrFile requestFileObject = SevrFile(
+              var _fileStreamController = StreamController();
+              var requestFileObject = SevrFile(
                   formDataObject.contentDisposition.parameters['name'],
                   formDataObject.contentDisposition.parameters['filename'],
                   _fileStreamController);
@@ -197,99 +196,99 @@ class Sevr {
   }
 
   ///create a `get` request, route: uri, callbacks: list of callback functions to run.
-  get(String route,
+  dynamic get(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.gets[route] = callbacks;
+    router.gets[route] = callbacks;
   }
 
   ///create a `post` request, route: uri, callbacks: list of callback functions to run.
-  post(String route,
+  dynamic post(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.posts[route] = callbacks;
+    router.posts[route] = callbacks;
   }
 
   ///create a `patch` request, route: uri, callbacks: list of callback functions to run.
-  patch(String route,
+  dynamic patch(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.patchs[route] = callbacks;
+    router.patchs[route] = callbacks;
   }
 
   ///create a `put` request, route: uri, callbacks: list of callback functions to run.
-  put(String route,
+  dynamic put(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.puts[route] = callbacks;
+    router.puts[route] = callbacks;
   }
 
   ///create a `delete` request, route: uri, callbacks: list of callback functions to run.
-  delete(String route,
+  dynamic delete(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.deletes[route] = callbacks;
+    router.deletes[route] = callbacks;
   }
 
   ///create a `copy` request, route: uri, callbacks: list of callback functions to run.
-  copy(String route,
+  dynamic copy(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.copys[route] = callbacks;
+    router.copys[route] = callbacks;
   }
 
   ///create a `head` request, route: uri, callbacks: list of callback functions to run.
-  head(String route,
+  dynamic head(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.heads[route] = callbacks;
+    router.heads[route] = callbacks;
   }
 
   ///create a `options` request, route: uri, callbacks: list of callback functions to run.
-  options(String route,
+  dynamic options(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.optionss[route] = callbacks;
+    router.optionss[route] = callbacks;
   }
 
   ///create a `link` request, route: uri, callbacks: list of callback functions to run.
-  link(String route,
+  dynamic link(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.links[route] = callbacks;
+    router.links[route] = callbacks;
   }
 
   ///create a `unlink` request, route: uri, callbacks: list of callback functions to run.
-  unlink(String route,
+  dynamic unlink(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.unlinks[route] = callbacks;
+    router.unlinks[route] = callbacks;
   }
 
   ///create a `purge` request, route: uri, callbacks: list of callback functions to run.
-  purge(String route,
+  dynamic purge(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.purges[route] = callbacks;
+    router.purges[route] = callbacks;
   }
 
   ///create a `lock` request, route: uri, callbacks: list of callback functions to run.
-  lock(String route,
+  dynamic lock(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.locks[route] = callbacks;
+    router.locks[route] = callbacks;
   }
 
   ///create a `unlock` request, route: uri, callbacks: list of callback functions to run.
-  unlock(String route,
+  dynamic unlock(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.unlocks[route] = callbacks;
+    router.unlocks[route] = callbacks;
   }
 
   ///create a `propfind` request, route: uri, callbacks: list of callback functions to run.
-  propfind(String route,
+  dynamic propfind(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.propfinds[route] = callbacks;
+    router.propfinds[route] = callbacks;
   }
 
   ///create a `view` request, route: uri, callbacks: list of callback functions to run.
-  view(String route,
+  dynamic view(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
-    this.router.views[route] = callbacks;
+    router.views[route] = callbacks;
   }
 
   void _handleRequests(
       ServRequest req, ServResponse res, String reqType) async {
     Map reqTypeMap = getAllRoutes[reqType];
-    String path = req.path.endsWith('/')
+    var path = req.path.endsWith('/')
         ? req.path.replaceRange(req.path.length - 1, req.path.length, '')
         : req.path;
     // print(path);
@@ -315,7 +314,7 @@ class Sevr {
     } else {
       await _consumeOpenFileStreams(req);
       for (SevrDir directory in servDirs) {
-        String filePath = '${directory.dir.path}${req.path}';
+        var filePath = '${directory.dir.path}${req.path}';
         // print(filePath);
         if (await File(filePath).exists()) {
           (await res.status(HttpStatus.ok).sendFile(filePath)).close();
@@ -356,8 +355,8 @@ class Sevr {
 
   Future<void> _consumeOpenFileStreams(ServRequest req) async {
     if (req.files.isNotEmpty) {
-      for (int i = 0; i < req.files.keys.length; i++) {
-        File file = File(req.files[req.files.keys.toList()[i]].filename);
+      for (var i = 0; i < req.files.keys.length; i++) {
+        var file = File(req.files[req.files.keys.toList()[i]].filename);
         SevrFile fileC = req.files[req.files.keys.toList()[i]];
         if (!fileC.streamController.isClosed) {
           await for (var data in fileC.streamController.stream) {
@@ -370,14 +369,14 @@ class Sevr {
     return;
   }
 
-  use(dynamic obj) {
+  dynamic use(dynamic obj) {
     switch (obj.runtimeType) {
       case SevrDir:
         servDirs.add(obj);
         break;
 
       case Router:
-        this.router.join(obj);
+        router.join(obj);
         break;
 
         break;
@@ -389,7 +388,7 @@ class Sevr {
 class SevrDir {
   Directory dir;
   SevrDir(String dirString) {
-    this.dir = Directory(dirString);
+    dir = Directory(dirString);
   }
 }
 
