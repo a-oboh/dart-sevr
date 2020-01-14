@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:sevr/sevr.dart';
 
 main() {

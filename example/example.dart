@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:sevr/sevr.dart';
 import 'package:path/path.dart' as p;
 

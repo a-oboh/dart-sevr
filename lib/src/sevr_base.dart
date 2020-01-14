@@ -63,7 +63,6 @@ class Sevr {
     String contentType = req.headers.contentType.toString();
     Map<String, dynamic> jsonData = {};
     dynamic downloadData = List<int>();
-    List<dynamic> tempOnData = List<int>();
 
     if (contentType.contains('multipart/form-data')) {
       contentType = 'multipart/form-data';
@@ -74,14 +73,20 @@ class Sevr {
         StreamSubscription _sub;
         _sub = request.listen((Uint8List onData) {
           downloadData.addAll(onData);
-        }, onDone: () {
-          String s = String.fromCharCodes(downloadData);
+        }, onDone: (){
+          try{
+            String s = String.fromCharCodes(downloadData);
           if (s.isNotEmpty) {
             jsonData.addAll(json.decode(s));
-            req.body = jsonData;
+            req.tempBody = jsonData; 
           }
+         
+          } catch (e){
+              req.currentException = e;
+          }
+           _handleRequests(req, res, request.method);
 
-          _handleRequests(req, res, request.method);
+          
         });
 
         break;
@@ -130,7 +135,7 @@ class Sevr {
                   await formDataObject.join()
             });
             // print(':;;;;;;;;;;;');
-            req.body = jsonData;
+            req.tempBody = jsonData;
             // print(jsonData);
             // });
           }
@@ -150,7 +155,7 @@ class Sevr {
 
         buildMapFromUri(result, body);
 
-        req.body = result;
+        req.tempBody = result;
 
         Future.delayed(Duration.zero, () {
           _handleRequests(req, res, request.method);
@@ -161,7 +166,6 @@ class Sevr {
         request.listen((onData) {
           print(String.fromCharCodes(onData));
         });
-        // print('bro html');
 
         Future.delayed(Duration.zero, () {
           _handleRequests(req, res, request.method);
@@ -357,7 +361,7 @@ class Sevr {
   Future<void> _consumeOpenFileStreams(ServRequest req) async {
     if (req.files.isNotEmpty) {
       for (int i = 0; i < req.files.keys.length; i++) {
-        File file = File(req.files[req.files.keys.toList()[i]].filename);
+        // File file = File(req.files[req.files.keys.toList()[i]].filename);
         SevrFile fileC = req.files[req.files.keys.toList()[i]];
         if (!fileC.streamController.isClosed) {
           await for (var data in fileC.streamController.stream) {

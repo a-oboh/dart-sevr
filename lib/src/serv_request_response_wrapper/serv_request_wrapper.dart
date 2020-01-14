@@ -2,17 +2,27 @@ import 'dart:async';
 import 'dart:convert' as json_helper;
 import 'dart:io';
 
-import 'package:sevr/src/http_server/http_server.dart';
 import 'package:sevr/src/mime/mime.dart';
 
 ///wrapper for [HttpRequest]
 class ServRequest {
   HttpRequest request;
-  Map<String, dynamic> body = {};
+  Map<String, dynamic> tempBody = {};
   Map<String, dynamic> files = {};
   Map<String, String> params = {};
+  Exception currentException;
+  ServException _exceptionThrower;
   ServRequest(HttpRequest request) {
     this.request = request;
+  }
+
+  dynamic get body {
+    if ( currentException == null){
+      return tempBody;
+    }
+    _exceptionThrower = ServException.from(currentException);
+    currentException = null;
+    _exceptionThrower.throwException();
   }
 
   /// the uri/path for an endpoint
@@ -96,4 +106,18 @@ class SevrFile {
   String name;
 
   SevrFile(this.name, this.filename, this.streamController);
+}
+
+class ServException implements Exception{
+
+  Exception _exception;
+  ServException(this._exception);
+
+  static ServException from(Exception e){
+    return ServException(e);
+  }
+
+  throwException(){
+    throw _exception;
+  }
 }

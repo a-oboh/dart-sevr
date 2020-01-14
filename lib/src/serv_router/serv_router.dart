@@ -32,77 +32,77 @@ class Router {
   Map<String, List<Function(ServRequest req, ServResponse res)>> views = {};
   // List<String> getRoutes = [];
 
-  get(String route,
+  void get(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     gets[route] = callbacks;
   }
 
-  post(String route,
+  void post(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     posts[route] = callbacks;
   }
 
-   patch(String route,
+  void patch(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     patchs[route] = callbacks;
   }
 
-  put(String route,
+  void put(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     puts[route] = callbacks;
   }
 
- delete(String route,
+ void delete(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     deletes[route] = callbacks;
   }
 
-   copy(String route,
+   void copy(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     copys[route] = callbacks;
   }
 
-   head(String route,
+  void head(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     heads[route] = callbacks;
   }
 
-   options(String route,
+  void options(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     optionss[route] = callbacks;
   }
 
-   link(String route,
+  void link(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     links[route] = callbacks;
   }
 
-   unlink(String route,
+  void unlink(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     unlinks[route] = callbacks;
   }
 
-   purge(String route,
+  void purge(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     purges[route] = callbacks;
   }
 
-  lock(String route,
+  void lock(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     locks[route] = callbacks;
   }
 
-  unlock(String route,
+  void unlock(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     unlocks[route] = callbacks;
   }
 
-  propfind(String route,
+  void propfind(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     propfinds[route] = callbacks;
   }
 
-  view(String route,
+  void view(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     views[route] = callbacks;
   }
