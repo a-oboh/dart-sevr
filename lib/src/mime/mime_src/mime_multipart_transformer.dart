@@ -40,10 +40,8 @@ class MimeMultipartTransformer
   Stream<MimeMultipart> bind(Stream<List<int>> stream) {
     // print(':::::::;;$stream');
     Stream<MimeMultipart> j;
-    j =  BoundMultipartStream(_boundary, stream).stream;
+    j = BoundMultipartStream(_boundary, stream).stream;
     // print(j);
-     return j;
+    return j;
   }
 }
-
-

@@ -63,8 +63,8 @@ class Sevr {
     var contentType = req.headers.contentType.toString();
     var jsonData = {};
     dynamic downloadData = [];
-    List<dynamic> tempOnData;
-    tempOnData = [];
+    // List<dynamic> tempOnData;
+    // tempOnData = [];
 
     if (contentType.contains('multipart/form-data')) {
       contentType = 'multipart/form-data';
@@ -370,7 +370,7 @@ class Sevr {
   Future<void> _consumeOpenFileStreams(ServRequest req) async {
     if (req.files.isNotEmpty) {
       for (var i = 0; i < req.files.keys.length; i++) {
-        var file = File(req.files[req.files.keys.toList()[i]].filename);
+        // var file = File(req.files[req.files.keys.toList()[i]].filename);
         SevrFile fileC = req.files[req.files.keys.toList()[i]];
         if (!fileC.streamController.isClosed) {
           await for (var data in fileC.streamController.stream) {
