@@ -175,7 +175,8 @@ class BoundMultipartStream {
 
   void _parse() {
     // Number of boundary bytes to artificially place before the supplied data.
-    int boundaryPrefix = 0;
+    int boundaryPrefix;
+    boundaryPrefix = 0;
     // Position where content starts. Will be null if no known content
     // start exists. Will be negative of the content starts in the
     // boundary prefix. Will be zero or position if the content starts
@@ -256,7 +257,7 @@ class BoundMultipartStream {
           break;
 
         case _HEADER_START:
-          _headers = Map<String, String>();
+          _headers = <String, String>{};
           if (byte == CharCode.CR) {
             _state = _HEADER_ENDING;
           } else {
@@ -304,8 +305,10 @@ class BoundMultipartStream {
           if (byte == CharCode.SP || byte == CharCode.HT) {
             _state = _HEADER_VALUE_START;
           } else {
-            String headerField = utf8.decode(_headerField);
-            String headerValue = utf8.decode(_headerValue);
+            String headerField;
+            headerField = utf8.decode(_headerField);
+            String headerValue;
+            headerValue = utf8.decode(_headerValue);
             _headers[headerField.toLowerCase()] = headerValue;
             _headerField.clear();
             _headerValue.clear();

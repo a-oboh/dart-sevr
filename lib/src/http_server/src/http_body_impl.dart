@@ -211,6 +211,7 @@ class _HttpRequestBody extends _HttpBody implements HttpRequestBody {
 
 class _HttpClientResponseBody extends _HttpBody
     implements HttpClientResponseBody {
+  @override
   final HttpClientResponse response;
 
   _HttpClientResponseBody(this.response, HttpBody body)

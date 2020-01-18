@@ -63,7 +63,8 @@ class Sevr {
     var contentType = req.headers.contentType.toString();
     var jsonData = {};
     dynamic downloadData = [];
-    List<dynamic> tempOnData = [];
+    List<dynamic> tempOnData;
+    tempOnData = [];
 
     if (contentType.contains('multipart/form-data')) {
       contentType = 'multipart/form-data';
@@ -145,7 +146,8 @@ class Sevr {
             .transform(utf8.decoder.cast<Uint8List, dynamic>())
             .join();
 
-        Map<String, dynamic> result = {};
+        Map<String, dynamic> result;
+        result = {};
 
         buildMapFromUri(result, body);
 
@@ -338,12 +340,16 @@ class Sevr {
 
   ///filters the params on the request path
   Map<String, dynamic> getRouteParams(String route, Map<String, List> query) {
-    Map<String, dynamic> compareMap = {'params': {}, 'route': null};
-    String matched = query.keys.firstWhere((String key) {
-      List<String> routeArr = route.split('/');
-      List<String> keyArr = key.split('/');
+    Map<String, dynamic> compareMap;
+    compareMap = {'params': {}, 'route': null};
+    String matched;
+    matched = query.keys.firstWhere((String key) {
+      List<String> routeArr;
+      routeArr = route.split('/');
+      List<String> keyArr;
+      keyArr = key.split('/');
       if (routeArr.length != keyArr.length) return false;
-      for (int i = 0; i < routeArr.length; i++) {
+      for (var i = 0; i < routeArr.length; i++) {
         if (routeArr[i].toLowerCase() == keyArr[i].toLowerCase() ||
             keyArr[i].toLowerCase().startsWith(':')) {
           if (keyArr[i].toLowerCase().startsWith(':')) {

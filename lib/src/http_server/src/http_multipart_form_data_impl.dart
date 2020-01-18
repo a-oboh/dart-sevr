@@ -87,8 +87,9 @@ class HttpMultipartFormDataImpl extends Stream
         type, disposition, encoding, multipart, defaultEncoding);
   }
 
+  @override
   StreamSubscription listen(void onData(data),
-      {void onDone(), Function onError, bool cancelOnError}) {
+      {void Function() onDone, Function onError, bool cancelOnError}) {
     return _stream.listen(onData,
         onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   }
