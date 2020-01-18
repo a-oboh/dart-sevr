@@ -125,6 +125,7 @@ class HttpBodyHandler
     return HttpBodyHandlerImpl.processResponse(response, defaultEncoding);
   }
 
+  @override
   Stream<HttpRequestBody> bind(Stream<HttpRequest> stream) {
     return _transformer.bind(stream);
   }

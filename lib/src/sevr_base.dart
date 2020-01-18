@@ -313,7 +313,7 @@ class Sevr {
       }
     } else {
       await _consumeOpenFileStreams(req);
-      for (SevrDir directory in servDirs) {
+      for (var directory in servDirs) {
         var filePath = '${directory.dir.path}${req.path}';
         // print(filePath);
         if (await File(filePath).exists()) {
@@ -329,6 +329,14 @@ class Sevr {
     }
   }
 
+  ///Gets query Parameters
+  dynamic getQuery(String route) {
+    var uri = Uri.tryParse(route);
+
+    uri.queryParameters;
+  }
+
+  ///filters the params on the request path
   Map<String, dynamic> getRouteParams(String route, Map<String, List> query) {
     Map<String, dynamic> compareMap = {'params': {}, 'route': null};
     String matched = query.keys.firstWhere((String key) {
@@ -369,6 +377,7 @@ class Sevr {
     return;
   }
 
+  /// Let Sevr Know where to find your files
   dynamic use(dynamic obj) {
     switch (obj.runtimeType) {
       case SevrDir:

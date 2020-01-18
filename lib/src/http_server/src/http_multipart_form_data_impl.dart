@@ -33,8 +33,8 @@ class HttpMultipartFormDataImpl extends Stream
     _stream = _mimeMultipart;
     if (contentTransferEncoding != null) {
       // TODO(ajohnsen): Support BASE64, etc.
-      throw HttpException("Unsupported contentTransferEncoding: "
-          "${contentTransferEncoding.value}");
+      throw HttpException('Unsupported contentTransferEncoding: '
+          '${contentTransferEncoding.value}');
     }
 
     if (contentType == null ||

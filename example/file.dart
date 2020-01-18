@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:sevr/src/http_server/http_server.dart';
-
 File targetFile = File('example/web/index.html');
 
 Future main() async {
@@ -9,7 +7,7 @@ Future main() async {
 
   try {
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 4044);
-    print("listening on: ${server.port}");
+    print('listening on: ${server.port}');
   } catch (e) {
     print("Couldn't bind to port 4044: $e");
     exit(-1);
@@ -17,7 +15,7 @@ Future main() async {
 
   await for (HttpRequest req in server) {
     if (await targetFile.exists()) {
-      print("Serving ${targetFile.path}.");
+      print('Serving ${targetFile.path}.');
       req.response.headers.contentType = ContentType.html;
       try {
         await req.response.addStream(targetFile.openRead());

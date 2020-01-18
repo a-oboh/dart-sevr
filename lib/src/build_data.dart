@@ -1,7 +1,7 @@
 import 'package:dart2_constant/convert.dart';
 
 /// convert ints and floats to numbers
-getValue(String value) {
+dynamic getValue(String value) {
   try {
     var numValue = num.parse(value);
     if (!numValue.isNaN) {
@@ -23,7 +23,7 @@ getValue(String value) {
 }
 
 /// Converts data from urlencoded to map
-buildMapFromUri(Map map, String body) {
+dynamic buildMapFromUri(Map map, String body) {
   var parseArrayRgx = RegExp(r'^(.+)\[\]$');
 
   for (String keyValuePair in body.split('&')) {
