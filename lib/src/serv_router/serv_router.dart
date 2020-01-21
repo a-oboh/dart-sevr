@@ -32,97 +32,96 @@ class Router {
   Map<String, List<Function(ServRequest req, ServResponse res)>> views = {};
   // List<String> getRoutes = [];
 
-  get(String route,
+  dynamic get(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     gets[route] = callbacks;
   }
 
-  post(String route,
+  dynamic post(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     posts[route] = callbacks;
   }
 
-   patch(String route,
+  dynamic patch(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     patchs[route] = callbacks;
   }
 
-  put(String route,
+  dynamic put(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     puts[route] = callbacks;
   }
 
- delete(String route,
+  dynamic delete(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     deletes[route] = callbacks;
   }
 
-   copy(String route,
+  dynamic copy(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     copys[route] = callbacks;
   }
 
-   head(String route,
+  dynamic head(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     heads[route] = callbacks;
   }
 
-   options(String route,
+  dynamic options(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     optionss[route] = callbacks;
   }
 
-   link(String route,
+  dynamic link(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     links[route] = callbacks;
   }
 
-   unlink(String route,
+  dynamic unlink(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     unlinks[route] = callbacks;
   }
 
-   purge(String route,
+  dynamic purge(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     purges[route] = callbacks;
   }
 
-  lock(String route,
+  dynamic lock(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     locks[route] = callbacks;
   }
 
-  unlock(String route,
+  dynamic unlock(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     unlocks[route] = callbacks;
   }
 
-  propfind(String route,
+  dynamic propfind(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     propfinds[route] = callbacks;
   }
 
-  view(String route,
+  dynamic view(String route,
       List<Function(ServRequest req, ServResponse res)> callbacks) {
     views[route] = callbacks;
   }
 
-  void join(Router rter){
-    this.gets.addAll(rter.gets);
-    this.posts.addAll(rter.posts);
-    this.patchs.addAll(rter.patchs);
-    this.puts.addAll(rter.puts);
-    this.deletes.addAll(rter.deletes);
-    this.copys.addAll(rter.copys);
-    this.heads.addAll(rter.heads);
-    this.optionss.addAll(rter.optionss);
-    this.links.addAll(rter.links);
-    this.unlinks.addAll(rter.unlinks);
-    this.purges.addAll(rter.purges);
-    this.locks.addAll(rter.locks);
-    this.unlocks.addAll(rter.unlocks);
-    this.propfinds.addAll(rter.propfinds);
-    this.views.addAll(rter.views);
+  void join(Router rter) {
+    gets.addAll(rter.gets);
+    posts.addAll(rter.posts);
+    patchs.addAll(rter.patchs);
+    puts.addAll(rter.puts);
+    deletes.addAll(rter.deletes);
+    copys.addAll(rter.copys);
+    heads.addAll(rter.heads);
+    optionss.addAll(rter.optionss);
+    links.addAll(rter.links);
+    unlinks.addAll(rter.unlinks);
+    purges.addAll(rter.purges);
+    locks.addAll(rter.locks);
+    unlocks.addAll(rter.unlocks);
+    propfinds.addAll(rter.propfinds);
+    views.addAll(rter.views);
   }
-
 }

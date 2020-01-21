@@ -8,9 +8,9 @@ import 'dart:async';
 class MimeMultipartException implements Exception {
   final String message;
 
-  const MimeMultipartException([this.message = ""]);
+  const MimeMultipartException([this.message = '']);
 
-  String toString() => "MimeMultipartException: $message";
+  String toString() => 'MimeMultipartException: $message';
 }
 
 /// A Mime Multipart class representing each part parsed by

@@ -1,17 +1,14 @@
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:sevr/sevr.dart';
-
-main() {
+void main(List<String> arguments) {
+  print(arguments);
   var serv = Sevr();
-  serv.get('/test', [
+  serv.post('/upload', [
     (req, res) async {
-      for (int i = 0; i < req.files.keys.length; i++) {
-        //Handle your file stream as you see fit, write to file, pipe to a cdn etc --->
-        File file = File(req.files[req.files.keys.toList()[i]].filename);
-        await for (var data
-            in req.files[req.files.keys.toList()[i]].streamController.stream) {
+      for (var sevrFile in req.files.values){
+        var file = File(sevrFile.filename);
+        if (await file.exists()){ file.deleteSync();}
+        await for (var data in sevrFile.streamController.stream){
           if (data is String) {
             await file.writeAsString(data, mode: FileMode.append);
           } else {
@@ -24,7 +21,7 @@ main() {
     }
   ]);
 
-  serv.listen(3000, callback: () {
-    print('Listening on ${3000}');
+  serv.listen(8000, callback: () {
+    print('Listening on port: ${8000}');
   });
 }

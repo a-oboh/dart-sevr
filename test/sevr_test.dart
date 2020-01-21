@@ -5,11 +5,11 @@ import 'package:test/test.dart';
 void main() {
   group('Test host connection', () {
     Sevr sevr;
-    int port = 4040;
+    var port = 4040;
 
     setUp(() {
       sevr = Sevr();
-      sevr.listen(port, messageReturn:'Listening on port: ${port}');
+      sevr.listen(port, messageReturn: 'Listening on port: ${port}');
     });
 
     test('First Test', () {
