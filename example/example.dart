@@ -3,7 +3,7 @@ import 'package:path/path.dart' as p;
 
 main() {
   var serv = Sevr();
-  serv.use(Sevr.static('./web'));
+  serv.use(Sevr.static(p.absolute('web')));
 
   //We can create controller,middleware classes etc, put them in a list and pass them into the router methods
   serv.get('/file', [

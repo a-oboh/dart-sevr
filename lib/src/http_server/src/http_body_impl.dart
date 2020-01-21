@@ -19,6 +19,7 @@ class HttpBodyHandlerTransformer
 
   const HttpBodyHandlerTransformer(this._defaultEncoding);
 
+  @override
   Stream<HttpRequestBody> bind(Stream<HttpRequest> stream) {
     return Stream<HttpRequestBody>.eventTransformed(
         stream,
@@ -35,6 +36,7 @@ class _HttpBodyHandlerTransformerSink implements EventSink<HttpRequest> {
 
   _HttpBodyHandlerTransformerSink(this._defaultEncoding, this._outSink);
 
+  @override
   void add(HttpRequest request) {
     _pending++;
     HttpBodyHandlerImpl.processRequest(request, _defaultEncoding)
@@ -45,10 +47,12 @@ class _HttpBodyHandlerTransformerSink implements EventSink<HttpRequest> {
     });
   }
 
+  @override
   void addError(Object error, [StackTrace stackTrace]) {
     _outSink.addError(error, stackTrace);
   }
 
+  @override
   void close() {
     _closed = true;
     if (_pending == 0) _outSink.close();
@@ -80,7 +84,7 @@ class HttpBodyHandlerImpl {
     Future<HttpBody> asBinary() {
       return stream
           .fold(BytesBuilder(), (builder, data) => builder..add(data))
-          .then((builder) => _HttpBody("binary", builder.takeBytes()));
+          .then((builder) => _HttpBody('binary', builder.takeBytes()));
     }
 
     Future<HttpBody> asText(Encoding defaultEncoding) {
@@ -91,7 +95,7 @@ class HttpBodyHandlerImpl {
       return encoding.decoder
           .bind(stream)
           .fold(StringBuffer(), (buffer, data) => buffer..write(data))
-          .then((buffer) => _HttpBody("text", buffer.toString()));
+          .then((buffer) => _HttpBody('text', buffer.toString()));
     }
 
     Future<HttpBody> asFormData() {
@@ -136,16 +140,16 @@ class HttpBodyHandlerImpl {
     }
 
     switch (contentType.primaryType) {
-      case "text":
+      case 'text':
         return asText(defaultEncoding);
 
-      case "application":
+      case 'application':
         switch (contentType.subType) {
-          case "json":
+          case 'json':
             return asText(utf8)
-                .then((body) => _HttpBody("json", jsonDecode(body.body)));
+                .then((body) => _HttpBody('json', jsonDecode(body.body)));
 
-          case "x-www-form-urlencoded":
+          case 'x-www-form-urlencoded':
             return asText(ascii).then((body) {
               var map =
                   Uri.splitQueryString(body.body, encoding: defaultEncoding);
@@ -153,7 +157,7 @@ class HttpBodyHandlerImpl {
               for (var key in map.keys) {
                 result[key] = map[key];
               }
-              return _HttpBody("form", result);
+              return _HttpBody('form', result);
             });
 
           default:
@@ -161,9 +165,9 @@ class HttpBodyHandlerImpl {
         }
         break;
 
-      case "multipart":
+      case 'multipart':
         switch (contentType.subType) {
-          case "form-data":
+          case 'form-data':
             return asFormData();
 
           default:
@@ -180,20 +184,26 @@ class HttpBodyHandlerImpl {
 }
 
 class _HttpBodyFileUpload implements HttpBodyFileUpload {
+  @override
   final ContentType contentType;
+  @override
   final String filename;
+  @override
   final dynamic content;
   _HttpBodyFileUpload(this.contentType, this.filename, this.content);
 }
 
 class _HttpBody implements HttpBody {
+  @override
   final String type;
+  @override
   final dynamic body;
 
   _HttpBody(this.type, this.body);
 }
 
 class _HttpRequestBody extends _HttpBody implements HttpRequestBody {
+  @override
   final HttpRequest request;
 
   _HttpRequestBody(this.request, HttpBody body) : super(body.type, body.body);
@@ -201,6 +211,7 @@ class _HttpRequestBody extends _HttpBody implements HttpRequestBody {
 
 class _HttpClientResponseBody extends _HttpBody
     implements HttpClientResponseBody {
+  @override
   final HttpClientResponse response;
 
   _HttpClientResponseBody(this.response, HttpBody body)

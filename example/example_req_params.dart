@@ -1,9 +1,8 @@
 import 'package:sevr/sevr.dart';
 
-main() {
+dynamic main() {
   var serv = Sevr();
 
-  //so like express we can create controller,middleware classes etc and then put them in a list and then pass them into the router methods
   serv.get('/test/:username', [
     (ServRequest req, ServResponse res) {
       return res.status(200).json({'params': req.params});

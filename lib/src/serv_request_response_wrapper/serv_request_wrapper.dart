@@ -8,7 +8,9 @@ import 'package:sevr/src/mime/mime.dart';
 class ServRequest {
   HttpRequest request;
   Map<String, dynamic> tempBody = {};
-  Map<String, dynamic> files = {};
+  Map<String, SevrFile> files = {};
+
+  /// A map of parameters [:param] attached to requests
   Map<String, String> params = {};
   Exception currentException;
   ServException _exceptionThrower;
@@ -28,6 +30,11 @@ class ServRequest {
   /// the uri/path for an endpoint
   String get path {
     return request.uri.path;
+  }
+
+  ///get a Map containing query parameters with `req.query`
+  Map get query {
+    return request.uri.queryParameters;
   }
 
   /// request headers
@@ -54,8 +61,9 @@ class ServResponse {
 
   // }
 
+  /// gets response from HttpRequest Stream
   HttpResponse get response {
-    return this.request.response;
+    return request.response;
   }
 
   ///Set [response.statusCode]
@@ -78,16 +86,18 @@ class ServResponse {
     // VirtualDirectory vd = VirtualDirectory('.');
     // vd.serveFile(File(returnFile),request);
 
-    File file = File(returnFile);
-    String mimeType = lookupMimeType(file.path);
-    response.headers.contentType = mimeType != null?ContentType.parse(mimeType):ContentType.binary;
+    File file;
+    file = File(returnFile);
+    String mimeType;
+    mimeType = lookupMimeType(file.path);
+    response.headers.contentType =
+        mimeType != null ? ContentType.parse(mimeType) : ContentType.binary;
     await response.addStream(file.openRead());
 
     return this;
   }
 
-
-
+  /// Close Stream
   ServResponse close() {
     response.close();
     isClosed = true;

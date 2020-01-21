@@ -33,8 +33,8 @@ class HttpMultipartFormDataImpl extends Stream
     _stream = _mimeMultipart;
     if (contentTransferEncoding != null) {
       // TODO(ajohnsen): Support BASE64, etc.
-      throw HttpException("Unsupported contentTransferEncoding: "
-          "${contentTransferEncoding.value}");
+      throw HttpException('Unsupported contentTransferEncoding: '
+          '${contentTransferEncoding.value}');
     }
 
     if (contentType == null ||
@@ -87,8 +87,9 @@ class HttpMultipartFormDataImpl extends Stream
         type, disposition, encoding, multipart, defaultEncoding);
   }
 
+  @override
   StreamSubscription listen(void onData(data),
-      {void onDone(), Function onError, bool cancelOnError}) {
+      {void Function() onDone, Function onError, bool cancelOnError}) {
     return _stream.listen(onData,
         onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   }
