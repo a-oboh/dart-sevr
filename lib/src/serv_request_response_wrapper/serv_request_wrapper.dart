@@ -2,22 +2,39 @@ import 'dart:async';
 import 'dart:convert' as json_helper;
 import 'dart:io';
 
-import 'package:sevr/src/http_server/http_server.dart';
 import 'package:sevr/src/mime/mime.dart';
 
 ///wrapper for [HttpRequest]
 class ServRequest {
   HttpRequest request;
-  Map<String, dynamic> body = {};
-  Map<String, dynamic> files = {};
+  Map<String, dynamic> tempBody = {};
+  Map<String, SevrFile> files = {};
+
+  /// A map of parameters [:param] attached to requests
   Map<String, String> params = {};
+  Exception currentException;
+  ServException _exceptionThrower;
   ServRequest(HttpRequest request) {
     this.request = request;
+  }
+
+  dynamic get body {
+    if ( currentException == null){
+      return tempBody;
+    }
+    _exceptionThrower = ServException.from(currentException);
+    currentException = null;
+    _exceptionThrower.throwException();
   }
 
   /// the uri/path for an endpoint
   String get path {
     return request.uri.path;
+  }
+
+  ///get a Map containing query parameters with `req.query`
+  Map get query {
+    return request.uri.queryParameters;
   }
 
   /// request headers
@@ -44,8 +61,9 @@ class ServResponse {
 
   // }
 
+  /// gets response from HttpRequest Stream
   HttpResponse get response {
-    return this.request.response;
+    return request.response;
   }
 
   ///Set [response.statusCode]
@@ -68,16 +86,18 @@ class ServResponse {
     // VirtualDirectory vd = VirtualDirectory('.');
     // vd.serveFile(File(returnFile),request);
 
-    File file = File(returnFile);
-    String mimeType = lookupMimeType(file.path);
-    response.headers.contentType = mimeType != null?ContentType.parse(mimeType):ContentType.binary;
+    File file;
+    file = File(returnFile);
+    String mimeType;
+    mimeType = lookupMimeType(file.path);
+    response.headers.contentType =
+        mimeType != null ? ContentType.parse(mimeType) : ContentType.binary;
     await response.addStream(file.openRead());
 
     return this;
   }
 
-
-
+  /// Close Stream
   ServResponse close() {
     response.close();
     isClosed = true;
@@ -96,4 +116,18 @@ class SevrFile {
   String name;
 
   SevrFile(this.name, this.filename, this.streamController);
+}
+
+class ServException implements Exception{
+
+  Exception _exception;
+  ServException(this._exception);
+
+  static ServException from(Exception e){
+    return ServException(e);
+  }
+
+  throwException(){
+    throw _exception;
+  }
 }

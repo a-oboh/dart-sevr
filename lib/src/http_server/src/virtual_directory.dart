@@ -41,7 +41,7 @@ class VirtualDirectory {
 
   final List<String> _pathPrefixSegments;
 
-  final RegExp _invalidPathRegExp = RegExp("[\\\/\x00]");
+  final RegExp _invalidPathRegExp = RegExp('[\\\/\x00]');
 
   _ErrorCallback _errorCallback;
   _DirCallback _dirCallback;
@@ -107,22 +107,23 @@ class VirtualDirectory {
   /// Set the [callback] to override the default directory listing. The
   /// [callback] will be called with the [Directory] to be listed and the
   /// [HttpRequest].
-  set directoryHandler(void callback(Directory dir, HttpRequest request)) {
+  set directoryHandler(
+      void Function(Directory dir, HttpRequest request) callback) {
     _dirCallback = callback;
   }
 
   /// Set the [callback] to override the error page handler. When [callback] is
   /// invoked, the `statusCode` property of the response is set.
-  set errorPageHandler(void callback(HttpRequest request)) {
+  set errorPageHandler(void Function(HttpRequest request) callback) {
     _errorCallback = callback;
   }
 
   Future _locateResource(String path, Iterator<String> segments) {
     // Don't allow navigating up paths.
-    if (segments.current == "..") return Future.value(null);
+    if (segments.current == '..') return Future.value(null);
     path = normalize(path);
     // If we jail to root, the relative path can never go up.
-    if (jailRoot && split(path).first == "..") return Future.value(null);
+    if (jailRoot && split(path).first == '..') return Future.value(null);
     String fullPath() => join(root, path);
     return FileSystemEntity.type(fullPath(), followLinks: false).then((type) {
       switch (type) {
@@ -140,7 +141,7 @@ class VirtualDirectory {
             return const _DirectoryRedirect();
           }
           var hasNext = segments.moveNext();
-          if (!hasNext && current == "") {
+          if (!hasNext && current == '') {
             return Directory(dirFullPath());
           } else {
             if (_invalidPathRegExp.hasMatch(current)) break;
@@ -192,13 +193,13 @@ class VirtualDirectory {
       }
 
       response.headers.set(HttpHeaders.lastModifiedHeader, lastModified);
-      response.headers.set(HttpHeaders.acceptRangesHeader, "bytes");
+      response.headers.set(HttpHeaders.acceptRangesHeader, 'bytes');
 
       return file.length().then((length) {
         var range = request.headers.value(HttpHeaders.rangeHeader);
         if (range != null) {
           // We only support one range, where the standard support several.
-          var matches = RegExp(r"^bytes=(\d*)\-(\d*)$").firstMatch(range);
+          var matches = RegExp(r'^bytes=(\d*)\-(\d*)$').firstMatch(range);
           // If the range header have the right format, handle it.
           if (matches != null &&
               (matches[1].isNotEmpty || matches[2].isNotEmpty)) {
@@ -308,7 +309,7 @@ http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   </tr>
 ''';
       var server = response.headers.value(HttpHeaders.serverHeader);
-      server ??= "";
+      server ??= '';
       var footer = '''</table>
 $server
 </body>
@@ -318,8 +319,8 @@ $server
       response.write(header);
 
       void add(String name, String modified, var size, bool folder) {
-        size ??= "-";
-        modified ??= "";
+        size ??= '-';
+        modified ??= '';
         var encodedSize = const HtmlEscape().convert(size.toString());
         var encodedModified = const HtmlEscape().convert(modified);
         var encodedLink = const HtmlEscape(HtmlEscapeMode.attribute)
@@ -378,7 +379,7 @@ $server
     var encodedError = const HtmlEscape().convert(error.toString());
 
     var server = response.headers.value(HttpHeaders.serverHeader);
-    server ??= "";
+    server ??= '';
     var page = '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
