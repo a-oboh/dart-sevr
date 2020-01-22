@@ -14,8 +14,7 @@ dependencies:
   # http_server: ^0.9.8+3
   pedantic: ^1.8.0
   mime: ^0.9.6+3
-
+  path: ^1.6.0
   dart2_constant: ^1.0.2+dart2
 dev_dependencies:
-  path: ^1.6.0
   test: ^1.6.0
