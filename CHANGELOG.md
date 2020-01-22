@@ -9,3 +9,7 @@
 # 1.0.2+2
 
 - Minor fixes.
+
+# 1.0.3
+
+- Fixes to serving files, added query parameters feature.
