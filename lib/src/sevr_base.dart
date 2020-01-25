@@ -76,7 +76,7 @@ class Sevr {
     var res = ServResponse(request);
     var contentType = req.headers.contentType.toString();
     var jsonData = {};
-    dynamic downloadData = [];
+    dynamic downloadData = <int>[];
     // List<dynamic> tempOnData;
     // tempOnData = [];
 
@@ -94,10 +94,10 @@ class Sevr {
             var s = String.fromCharCodes(downloadData);
             if (s.isNotEmpty) {
               jsonData.addAll(json.decode(s));
-              req.tempBody = jsonData;
+              req.tempBody = jsonData.cast<String,dynamic>();
             }
-          } catch (e) {
-            req.currentException = e;
+          } catch (e, stacktrace) {
+            req.currentExceptionList = [e,stacktrace];
           }
           _handleRequests(req, res, request.method);
         });
