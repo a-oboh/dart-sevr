@@ -18,13 +18,16 @@ class ServRequest {
     this.request = request;
   }
 
-  dynamic get body {
+  Map get body {
     if ( currentExceptionList == null){
       return tempBody;
-    }
-    _exceptionThrower = ServException.from(currentExceptionList);
+    } else {
+      _exceptionThrower = ServException.from(currentExceptionList);
     currentExceptionList = null;
     _exceptionThrower.throwException();
+    }
+    return {};
+    
   }
 
   /// the uri/path for an endpoint
