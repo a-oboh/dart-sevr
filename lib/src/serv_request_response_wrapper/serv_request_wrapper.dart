@@ -7,24 +7,27 @@ import 'package:sevr/src/mime/mime.dart';
 ///wrapper for [HttpRequest]
 class ServRequest {
   HttpRequest request;
-  Map<String, dynamic> tempBody = {};
+  Map<dynamic, dynamic> tempBody = {};
   Map<String, SevrFile> files = {};
 
   /// A map of parameters [:param] attached to requests
   Map<String, String> params = {};
-  Exception currentException;
+  List currentExceptionList;
   ServException _exceptionThrower;
   ServRequest(HttpRequest request) {
     this.request = request;
   }
 
-  dynamic get body {
-    if ( currentException == null){
+  Map get body {
+    if ( currentExceptionList == null){
       return tempBody;
-    }
-    _exceptionThrower = ServException.from(currentException);
-    currentException = null;
+    } else {
+      _exceptionThrower = ServException.from(currentExceptionList);
+    currentExceptionList = null;
     _exceptionThrower.throwException();
+    }
+    return {};
+    
   }
 
   /// the uri/path for an endpoint
@@ -118,16 +121,17 @@ class SevrFile {
   SevrFile(this.name, this.filename, this.streamController);
 }
 
-class ServException implements Exception{
+class ServException {
 
-  Exception _exception;
+  final List _exception; // A List of the exception and the stacktrace
   ServException(this._exception);
 
-  static ServException from(Exception e){
+  static ServException from(List e){
     return ServException(e);
   }
 
-  throwException(){
-    throw _exception;
+  void throwException(){
+    print(_exception[1]);
+    throw _exception[0];
   }
 }
