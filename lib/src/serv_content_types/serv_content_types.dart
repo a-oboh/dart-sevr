@@ -8,6 +8,21 @@ enum ServContentTypeEnum {
 }
 
 ServContentTypeEnum ServContentType(String type) {
+  var types = [
+    'application/x-www-form-urlencoded',
+    'text/plain',
+    'application/json',
+    'text/html',
+    'application/javascript',
+    'multipart/form-data'
+
+  ];
+  for (var t in types){
+    if (t.toLowerCase() == type.toLowerCase() || type.toLowerCase().contains(t.toLowerCase())){
+      type = t;
+      break;
+    }
+  };
   switch (type) {
     case 'application/x-www-form-urlencoded':
       return ServContentTypeEnum.ApplicationFormUrlEncoded;
