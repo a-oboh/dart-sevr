@@ -32,18 +32,18 @@ class Sevr {
 
   Sevr._internal();
 
-  void close()async{
-    if(server != null){
+  void close() async {
+    if (server != null) {
       await server.close(force: true);
     }
   }
 
-  void restart()async{
+  void restart() async {
     print('Restarting server');
     await close();
     listen(port);
     print('Succesfully restarted Sevr');
-  } 
+  }
 
   /// listens for connection on the specified port
   dynamic listen(int port,
@@ -54,7 +54,7 @@ class Sevr {
     if (callback != null) {
       callback();
     }
-    
+
     if (context == null) {
       server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
     } else {
@@ -76,7 +76,7 @@ class Sevr {
     var res = ServResponse(request);
     var contentType = req.headers.contentType.toString();
     var jsonData = {};
-    dynamic downloadData = [];
+    dynamic downloadData = <int>[];
     // List<dynamic> tempOnData;
     // tempOnData = [];
 
@@ -90,21 +90,17 @@ class Sevr {
         _sub = request.listen((Uint8List onData) {
           downloadData.addAll(onData);
         }, onDone: () {
-          try{
-          var s = String.fromCharCodes(downloadData);
-          if (s.isNotEmpty) {
-            jsonData.addAll(json.decode(s));
-            req.tempBody = jsonData; 
+          try {
+            var s = String.fromCharCodes(downloadData);
+            if (s.isNotEmpty) {
+              jsonData.addAll(json.decode(s));
+              req.tempBody = jsonData.cast<String,dynamic>();
+            }
+          } catch (e, stacktrace) {
+            req.currentExceptionList = [e,stacktrace];
           }
-         
-          } catch (e){
-              req.currentException = e;
-          }
-           _handleRequests(req, res, request.method);
-    }
-
-          
-        );
+          _handleRequests(req, res, request.method);
+        });
 
         break;
 
@@ -133,7 +129,8 @@ class Sevr {
                   requestFileObject;
             }
 
-            StreamController _fcont = req
+            StreamController _fcont;
+            _fcont = req
                 .files[formDataObject.contentDisposition.parameters['name']]
                 .streamController;
 
@@ -395,11 +392,12 @@ class Sevr {
     if (req.files.isNotEmpty) {
       for (var i = 0; i < req.files.keys.length; i++) {
         // var file = File(req.files[req.files.keys.toList()[i]].filename);
-        SevrFile fileC = req.files[req.files.keys.toList()[i]];
+        SevrFile fileC;
+        fileC = req.files[req.files.keys.toList()[i]];
         if (!fileC.streamController.isClosed) {
           await for (var data in fileC.streamController.stream) {
             //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-          
+
           }
         }
       }
