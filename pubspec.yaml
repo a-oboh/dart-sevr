@@ -1,6 +1,6 @@
 name: sevr
 description: A library to easily create http servers with Dart and perform Http requests.
-version: 1.0.2+3
+version: 1.0.3
 homepage: https://github.com/a-oboh/dart-sevr
 # authors:
 #   - Albert Oboh <albertoboh@yahoo.com>
