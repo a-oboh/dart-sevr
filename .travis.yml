@@ -7,9 +7,12 @@ branches:
   only:
   - master
 
+  after_install: 
+    - dartfmt -n .
+
 dart_task:
 - test
-- dartfmt
+# - dartfmt
 # Analyze fatal warnings only
 - dartanalyzer: --fatal-warnings lib
 
