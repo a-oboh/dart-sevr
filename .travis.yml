@@ -1,0 +1,13 @@
+language: dart
+dart:
+# Install the latest stable release
+- stable
+
+dart_task:
+- test
+- dartfmt: true
+# Analyze fatal warnings only
+- dartanalyzer: --fatal-warnings
+
+after_success:
+- pub publish
