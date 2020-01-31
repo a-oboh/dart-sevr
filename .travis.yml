@@ -3,6 +3,10 @@ dart:
 # Install the latest stable release
 - stable
 
+branches:
+  only:
+  - master
+
 dart_task:
 - test
 - dartfmt
