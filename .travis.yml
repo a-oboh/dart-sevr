@@ -7,7 +7,7 @@ branches:
   only:
   - master
 
-  after_install: 
+after_install: 
     - dartfmt -n .
 
 dart_task:
