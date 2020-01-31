@@ -13,8 +13,8 @@ dart_task:
 # Analyze fatal warnings only
 - dartanalyzer: --fatal-warnings lib
 
-deploy:
-  provider: script
-  script: bash scripts/release.sh
-  on:
-    all_branches: true
+# deploy:
+#   provider: script
+#   script: bash scripts/release.sh
+#   on:
+#     all_branches: true
