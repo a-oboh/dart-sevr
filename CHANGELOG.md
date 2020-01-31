@@ -13,3 +13,7 @@
 ## 1.0.3
 
 - Fixes to serving files, added query parameters feature.
+
+## 1.0.3+1
+
+- Fix bugs.
