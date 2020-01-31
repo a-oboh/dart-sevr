@@ -7,7 +7,8 @@ dart_task:
 - test
 - dartfmt: true
 # Analyze fatal warnings only
-- dartanalyzer: --fatal-warnings
+- dartanalyzer: --fatal-warnings lib
 
-after_success:
-- pub publish
+deploy:
+  provider: script
+  script: bash scripts/release.sh
