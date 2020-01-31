@@ -3,11 +3,18 @@ dart:
 # Install the latest stable release
 - stable
 
+branches:
+  only:
+  - master
+
 dart_task:
 - test
-- dartfmt: true
+# - dartfmt
 # Analyze fatal warnings only
-- dartanalyzer: --fatal-warnings
+- dartanalyzer: --fatal-warnings lib
 
-after_success:
-- pub publish
+# deploy:
+#   provider: script
+#   script: bash scripts/release.sh
+#   on:
+#     all_branches: true
