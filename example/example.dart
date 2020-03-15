@@ -45,7 +45,7 @@ dynamic main() {
   ]);
 
   //Upload Files
-  serv.get('/upload', [
+  serv.post('/upload', [
     (req, res) async {
       for (var i = 0; i < req.files.keys.length; i++) {
         //Handle your file stream as you see fit, write to file, pipe to a cdn etc --->

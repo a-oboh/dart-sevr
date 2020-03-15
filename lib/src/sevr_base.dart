@@ -49,26 +49,33 @@ class Sevr {
   dynamic listen(int port,
       {Function callback,
       SecurityContext context,
-      String messageReturn}) async {
-    this.messageReturn = messageReturn;
-    if (callback != null) {
-      callback();
-    }
+      String messageReturn,
+      Function(Object e, StackTrace c) errorHandler}) async {
+    await runZoned(() async {
+      this.messageReturn = messageReturn;
+      if (callback != null) {
+        callback();
+      }
+      if (context == null) {
+        server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
+      } else {
+        server = await HttpServer.bindSecure(
+            InternetAddress.loopbackIPv4, port, context);
+      }
 
-    if (context == null) {
-      server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
-    } else {
-      server = await HttpServer.bindSecure(
-          InternetAddress.loopbackIPv4, port, context);
-    }
+      this.port = port;
+      host = InternetAddress.loopbackIPv4;
 
-    this.port = port;
-    host = InternetAddress.loopbackIPv4;
-
-    await for (var request in server) {
-      //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
-      _serv(request);
-    }
+      await for (var request in server) {
+        //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
+        _serv(request);
+      }
+    },onError: errorHandler??(Object e, StackTrace s){
+      print(e);
+      print(s);
+      throw e;
+      }
+      );
   }
 
   dynamic call(HttpRequest request) async {
@@ -80,9 +87,9 @@ class Sevr {
     // List<dynamic> tempOnData;
     // tempOnData = [];
 
-    if (contentType.contains('multipart/form-data')) {
-      contentType = 'multipart/form-data';
-    }
+    // if (contentType.contains('multipart/form-data')) {
+    //   contentType = 'multipart/form-data';
+    // }
 
     switch (ServContentType(contentType)) {
       case ServContentTypeEnum.ApplicationJson:
@@ -94,10 +101,10 @@ class Sevr {
             var s = String.fromCharCodes(downloadData);
             if (s.isNotEmpty) {
               jsonData.addAll(json.decode(s));
-              req.tempBody = jsonData.cast<String,dynamic>();
+              req.tempBody = jsonData.cast<String, dynamic>();
             }
           } catch (e, stacktrace) {
-            req.currentExceptionList = [e,stacktrace];
+            req.currentExceptionList = [e, stacktrace];
           }
           _handleRequests(req, res, request.method);
         });
@@ -114,8 +121,8 @@ class Sevr {
           if (formDataObject.isBinary ||
               formDataObject.contentDisposition.parameters
                   .containsKey('filename')) {
-            // print('isBinary');
-            // print('${formDataObject.contentDisposition.parameters}');
+            print('isBinary');
+            print('${formDataObject.contentDisposition.parameters}');
             if (!fileKeys.contains(
                 formDataObject.contentDisposition.parameters['name'])) {
               fileKeys
