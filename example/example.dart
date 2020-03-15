@@ -9,6 +9,9 @@ dynamic main() {
   //let sevr know to serve from the /web directory
   serv.use(Sevr.static('example/web'));
 
+  //Allowe cross Origin requests
+  serv.use(CORS(['*']));
+
   //Use path to get directory of the files to serve on that route
   serv.get('/serve', [
     (ServRequest req, ServResponse res) {

@@ -26,7 +26,7 @@ void main() {
 
     test('test body for json', () async {
       var path = '/test';
-      ServRequest svrq;
+      var svrq;
       sevr.post(path, [
         (req, res) {
           svrq = req;
@@ -40,6 +40,8 @@ void main() {
           headers: {'Content-Type': 'application/json'});
       expect(json.encode(svrq.body), json.encode(body));
     });
+
+  
     //TODO: test file upload, it keeps failing
 //     test('test body for url formencoded parsing', () async {
 //       var path = '/test';

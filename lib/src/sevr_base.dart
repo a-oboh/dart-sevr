@@ -20,6 +20,7 @@ class Sevr {
   var host;
   List<SevrDir> servDirs = [];
   HttpServer server;
+  CORS cors;
 
   static SevrDir static(String dir) {
     return SevrDir(dir);
@@ -90,6 +91,11 @@ class Sevr {
     // if (contentType.contains('multipart/form-data')) {
     //   contentType = 'multipart/form-data';
     // }
+
+    if (cors != null){
+      print('setting response');
+      res.set('Access-Control-Allow-Origin', cors.allowed_origins.join(' | '));
+    }
 
     switch (ServContentType(contentType)) {
       case ServContentTypeEnum.ApplicationJson:
@@ -423,6 +429,10 @@ class Sevr {
         router.join(obj);
         break;
 
+      case CORS:
+        cors = obj;
+
+
         break;
       default:
     }
@@ -439,4 +449,10 @@ class SevrDir {
 class UpperCase extends Converter<String, String> {
   @override
   String convert(String input) => input.toUpperCase();
+}
+
+class CORS {
+  final List<String> allowed_origins;
+
+  CORS(this.allowed_origins);
 }
