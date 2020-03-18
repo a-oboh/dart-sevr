@@ -93,7 +93,6 @@ class Sevr {
     // }
 
     if (cors != null){
-      print('setting response');
       res.set('Access-Control-Allow-Origin', cors.allowed_origins.join(' | '));
     }
 
@@ -109,6 +108,7 @@ class Sevr {
               jsonData.addAll(json.decode(s));
               req.tempBody = jsonData.cast<String, dynamic>();
             }
+            _sub.cancel();
           } catch (e, stacktrace) {
             req.currentExceptionList = [e, stacktrace];
           }
