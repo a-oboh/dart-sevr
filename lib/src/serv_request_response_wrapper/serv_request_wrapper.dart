@@ -19,14 +19,15 @@ class ServRequest {
   }
 
   Map get body {
-    if ( currentExceptionList == null){
-      return tempBody;
-    } else {
-      _exceptionThrower = ServException.from(currentExceptionList);
-    currentExceptionList = null;
-    _exceptionThrower.throwException();
-    }
-    return {};
+    // if ( currentExceptionList == null){
+    //   return tempBody;
+    // } else {
+    //   _exceptionThrower = ServException.from(currentExceptionList);
+    // currentExceptionList = null;
+    // _exceptionThrower.throwException();
+    // }
+    // return {};
+    return tempBody;
     
   }
 
@@ -76,7 +77,7 @@ class ServResponse {
   }
 
   /// Return data in json format. data = a map to be converted to json
-  ServResponse json(Map<String, dynamic> data) {
+  ServResponse json(Map<dynamic, dynamic> data) {
     response
       ..headers.contentType = ContentType.json
       ..write(json_helper.json.encode(data));

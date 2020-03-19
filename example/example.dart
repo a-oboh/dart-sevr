@@ -9,6 +9,9 @@ dynamic main() {
   //let sevr know to serve from the /web directory
   serv.use(Sevr.static('example/web'));
 
+  //Allowe cross Origin requests
+  serv.use(CORS(['*']));
+
   //Use path to get directory of the files to serve on that route
   serv.get('/serve', [
     (ServRequest req, ServResponse res) {
@@ -45,7 +48,7 @@ dynamic main() {
   ]);
 
   //Upload Files
-  serv.get('/upload', [
+  serv.post('/upload', [
     (req, res) async {
       for (var i = 0; i < req.files.keys.length; i++) {
         //Handle your file stream as you see fit, write to file, pipe to a cdn etc --->
