@@ -16,5 +16,7 @@ dependencies:
   mime: ^0.9.6+3
   path: ^1.6.0
   dart2_constant: ^1.0.2+dart2
+  http: ^0.12.0+4
+  # dio: ^3.0.0
 dev_dependencies:
   test: ^1.6.0
