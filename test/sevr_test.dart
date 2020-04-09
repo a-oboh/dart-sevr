@@ -6,6 +6,7 @@ import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/sevr_base.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as p;
+
 void main() {
   Sevr sevr;
   var port = 8078;
@@ -16,7 +17,7 @@ void main() {
       sevr.listen(port, messageReturn: 'Listening on port: ${port}');
     });
 
-    test('First Test', () {
+    test('check if port is binded', () {
       expect(sevr.messageReturn, 'Listening on port: ${port}');
     });
 
@@ -41,7 +42,6 @@ void main() {
       expect(json.encode(svrq.body), json.encode(body));
     });
 
-  
     //TODO: test file upload, it keeps failing
 //     test('test body for url formencoded parsing', () async {
 //       var path = '/test';
@@ -56,7 +56,7 @@ void main() {
 //           return res.status(200).json({'data': ''});
 //         }
 //       ]);
-      
+
 //       var body = {'name': 'doodle', 'color': 'blue'};
 //       var response = await http.post('${url}${path}',
 //           body: body,
@@ -110,5 +110,15 @@ void main() {
     tearDown(() {
       sevr.close();
     });
+  });
+
+  group('', () async {
+    sevr.use(Sevr.static('example/web'));
+
+    sevr.get('/serve', [
+      (ServRequest req, ServResponse res) {
+        return res.status(200).sendFile(p.absolute('example/web/index.html'));
+      }
+    ]);
   });
 }

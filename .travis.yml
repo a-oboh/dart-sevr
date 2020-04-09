@@ -1,0 +1,20 @@
+language: dart
+dart:
+# Install the latest stable release
+- stable
+
+branches:
+  only:
+  - master
+
+dart_task:
+- test
+# - dartfmt
+# Analyze fatal warnings only
+- dartanalyzer: --fatal-warnings lib
+
+# deploy:
+#   provider: script
+#   script: bash scripts/release.sh
+#   on:
+#     all_branches: true

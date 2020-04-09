@@ -324,19 +324,33 @@ class Sevr {
   void _handleRequests(
       ServRequest req, ServResponse res, String reqType) async {
     Map reqTypeMap = getAllRoutes[reqType];
+
     var path = req.path.endsWith('/')
         ? req.path.replaceRange(req.path.length - 1, req.path.length, '')
         : req.path;
+
     // print(path);
     Map mapRes = getRouteParams(path, router.gets);
     Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
     req.params = params.cast<String, String>() ?? {};
     String matched = mapRes['route'];
     // print(matched);
-    List<Function(ServRequest, ServResponse)> selectedCallbacks =
-        reqTypeMap.containsKey(path)
-            ? reqTypeMap[path]
-            : matched != null ? reqTypeMap[matched] : null;
+    List<Function(ServRequest, ServResponse)> selectedCallbacks;
+
+    if (reqTypeMap.containsKey(path)) {
+      selectedCallbacks = reqTypeMap[path];
+    } else if (reqTypeMap.containsKey(path + '/')) {
+      selectedCallbacks = reqTypeMap[path + '/'];
+    } else if (matched != null) {
+      selectedCallbacks = reqTypeMap[matched];
+    } else {
+      selectedCallbacks = null;
+    }
+
+    // selectedCallbacks = reqTypeMap.containsKey(path)
+    //     ? reqTypeMap[path]
+    //     : matched != null ? reqTypeMap[matched] : null;
+
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);

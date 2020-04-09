@@ -28,7 +28,6 @@ class ServRequest {
     // }
     // return {};
     return tempBody;
-    
   }
 
   /// the uri/path for an endpoint
@@ -61,10 +60,6 @@ class ServResponse {
     this.request = request;
   }
 
-  // send(){
-
-  // }
-
   /// gets response from HttpRequest Stream
   HttpResponse get response {
     return request.response;
@@ -81,6 +76,16 @@ class ServResponse {
     response
       ..headers.contentType = ContentType.json
       ..write(json_helper.json.encode(data));
+
+    return this;
+  }
+
+  /// Return plain text or html
+  ServResponse send(String data) {
+    response
+      ..headers.contentType =
+          data.contains('</') ? ContentType.html : ContentType.text
+      ..write(data);
 
     return this;
   }
@@ -123,15 +128,14 @@ class SevrFile {
 }
 
 class ServException {
-
   final List _exception; // A List of the exception and the stacktrace
   ServException(this._exception);
 
-  static ServException from(List e){
+  static ServException from(List e) {
     return ServException(e);
   }
 
-  void throwException(){
+  void throwException() {
     print(_exception[1]);
     throw _exception[0];
   }

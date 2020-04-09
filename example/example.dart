@@ -15,14 +15,15 @@ dynamic main() {
   //Use path to get directory of the files to serve on that route
   serv.get('/serve', [
     (ServRequest req, ServResponse res) {
+      
       return res.status(200).sendFile(p.absolute('example/web/index.html'));
     }
   ]);
 
   //get request
-  serv.get('/test', [
+  serv.get('/', [
     (ServRequest req, ServResponse res) {
-      return res.status(200).json({'status': 'ok'});
+      return res.status(200).send('<h1>Hello World</h1>');
     }
   ]);
 
@@ -30,6 +31,13 @@ dynamic main() {
   serv.post('/post', [
     (ServRequest req, ServResponse res) async {
       return res.status(200).json(req.body);
+    }
+  ]);
+
+  //plain text
+  serv.get('/text', [
+    (ServRequest req, ServResponse res) {
+      return res.status(200).send('data');
     }
   ]);
 
