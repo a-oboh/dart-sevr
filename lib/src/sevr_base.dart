@@ -330,7 +330,7 @@ class Sevr {
         : req.path;
 
     // print(path);
-    Map mapRes = getRouteParams(path, router.gets);
+    Map mapRes = getRouteParams(path, reqTypeMap);
     Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
     req.params = params.cast<String, String>() ?? {};
     String matched = mapRes['route'];
