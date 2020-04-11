@@ -111,6 +111,7 @@ class Sevr {
             _sub.cancel();
           } catch (e, stacktrace) {
             req.currentExceptionList = [e, stacktrace];
+            rethrow;
           }
           _handleRequests(req, res, request.method);
         });
@@ -330,7 +331,7 @@ class Sevr {
         : req.path;
 
     // print(path);
-    Map mapRes = getRouteParams(path, reqTypeMap);
+    Map mapRes = getRouteParams(path, router.gets);
     Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
     req.params = params.cast<String, String>() ?? {};
     String matched = mapRes['route'];
