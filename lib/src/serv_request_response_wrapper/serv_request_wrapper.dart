@@ -75,7 +75,7 @@ class ServResponse {
   ServResponse json(Map<dynamic, dynamic> data) {
     response
       ..headers.contentType = ContentType.json
-      ..write(json_helper.json.encode(data));
+      ..write(json_helper.json.encode(data,toEncodable: (dynamic obj)=>obj is DateTime?obj.toIso8601String():obj.toString()));
 
     return this;
   }
