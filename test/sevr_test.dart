@@ -42,7 +42,7 @@ void main() {
       expect(json.encode(svrq.body), json.encode(body));
     });
 
-    //TODO: test file upload, it keeps failing
+//TODO: test file upload, it keeps failing
 //     test('test body for url formencoded parsing', () async {
 //       var path = '/test';
 //       ServRequest svrq;
@@ -112,7 +112,7 @@ void main() {
     });
   });
 
-  group('', () async {
+  group('', () {
     sevr.use(Sevr.static('example/web'));
 
     sevr.get('/serve', [

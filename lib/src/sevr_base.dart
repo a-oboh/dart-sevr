@@ -446,6 +446,8 @@ class Sevr {
 
       case CORS:
         cors = obj;
+        router.optionss.addAll(router.gets);
+        router.optionss.addAll(router.posts);
 
 
         break;
