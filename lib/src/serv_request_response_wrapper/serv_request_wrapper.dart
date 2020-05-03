@@ -72,10 +72,10 @@ class ServResponse {
   }
 
   /// Return data in json format. data = a map to be converted to json
-  ServResponse json(Map<dynamic, dynamic> data) {
+  ServResponse json(Map<dynamic, dynamic> data,{Function(dynamic) toEncodable}) {
     response
       ..headers.contentType = ContentType.json
-      ..write(json_helper.json.encode(data,toEncodable: (dynamic obj)=>obj is DateTime?obj.toIso8601String():obj.toString()));
+      ..write(json_helper.json.encode(data,toEncodable: toEncodable??(dynamic obj)=>obj is DateTime?obj.toIso8601String():obj.toString()));
 
     return this;
   }

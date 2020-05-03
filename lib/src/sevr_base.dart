@@ -91,9 +91,14 @@ class Sevr {
     // if (contentType.contains('multipart/form-data')) {
     //   contentType = 'multipart/form-data';
     // }
+    // print(request);
+    // print('ggfc');
+    // _handleRequests(req, res,'GET');
+    // return;
 
     if (cors != null){
       res.set('Access-Control-Allow-Origin', cors.allowed_origins.join(' | '));
+      res.set('Access-Control-Allow-Headers', 'Content-Type');
     }
 
     switch (ServContentType(contentType)) {
@@ -446,8 +451,24 @@ class Sevr {
 
       case CORS:
         cors = obj;
-        router.optionss.addAll(router.gets);
-        router.optionss.addAll(router.posts);
+        
+        router.optionss.addAll(router.gets.map((key, value){
+          return MapEntry(key, [(ServRequest req, ServResponse res){
+                return res.status(200);
+              }]);
+        }));
+        router.optionss.addAll(router.posts.map((key, value){
+          return MapEntry(key, [(ServRequest req, ServResponse res){
+                res.response.headers.removeAll('Content-Type');
+                res.response.headers.removeAll('x-content-type-options');
+                return res.status(200);
+              }]);
+        }));
+        // router.optionss.addAll(router.gets.map((key, value){
+        //   return MapEntry(key, [(ServRequest req, ServResponse res){
+        //         return res.status(200);
+        //       }]);
+        // }));
 
 
         break;
