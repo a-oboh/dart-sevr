@@ -51,6 +51,7 @@ class Sevr {
       {Function callback,
       SecurityContext context,
       String messageReturn,
+      String address,
       Function(Object e, StackTrace c) errorHandler}) async {
     await runZoned(() async {
       this.messageReturn = messageReturn;
@@ -58,7 +59,7 @@ class Sevr {
         callback();
       }
       if (context == null) {
-        server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
+        server = await HttpServer.bind(address??InternetAddress.loopbackIPv4, port);
       } else {
         server = await HttpServer.bindSecure(
             InternetAddress.loopbackIPv4, port, context);
