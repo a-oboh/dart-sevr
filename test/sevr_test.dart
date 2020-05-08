@@ -10,10 +10,12 @@ import 'package:path/path.dart' as p;
 void main() {
   Sevr sevr;
   var port = 8078;
+
   var url = 'http://127.0.0.1:${port}';
   group('Test host connection', () {
     setUp(() {
       sevr = Sevr();
+      sevr.use(Sevr.static('example/web'));
       sevr.listen(port, messageReturn: 'Listening on port: ${port}');
     });
 
@@ -42,7 +44,21 @@ void main() {
       expect(json.encode(svrq.body), json.encode(body));
     });
 
-//TODO: test file upload, it keeps failing
+    test('', () async {
+      sevr.get('/serve', [
+        (ServRequest req, ServResponse res) {
+          return res.status(200).sendFile(p.absolute('example/web/index.html'));
+        }
+      ]);
+      var path = '/serve';
+      var url = 'http://127.0.0.1:${port}';
+      var response = await http.get('${url}${path}');
+      expect(response.body, File(p.absolute('example/web/index.html')).readAsStringSync());
+
+
+    });
+
+///TODO: test file upload, it keeps failing
 //     test('test body for url formencoded parsing', () async {
 //       var path = '/test';
 //       ServRequest svrq;
@@ -110,15 +126,5 @@ void main() {
     tearDown(() {
       sevr.close();
     });
-  });
-
-  group('', () {
-    sevr.use(Sevr.static('example/web'));
-
-    sevr.get('/serve', [
-      (ServRequest req, ServResponse res) {
-        return res.status(200).sendFile(p.absolute('example/web/index.html'));
-      }
-    ]);
   });
 }

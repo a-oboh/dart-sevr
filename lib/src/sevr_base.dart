@@ -59,7 +59,8 @@ class Sevr {
         callback();
       }
       if (context == null) {
-        server = await HttpServer.bind(address??InternetAddress.loopbackIPv4, port);
+        server = await HttpServer.bind(
+            address ?? InternetAddress.loopbackIPv4, port);
       } else {
         server = await HttpServer.bindSecure(
             InternetAddress.loopbackIPv4, port, context);
@@ -72,12 +73,13 @@ class Sevr {
         //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
         _serv(request);
       }
-    },onError: errorHandler??(Object e, StackTrace s){
-      print(e);
-      print(s);
-      throw e;
-      }
-      );
+    },
+        onError: errorHandler ??
+            (Object e, StackTrace s) {
+              print(e);
+              print(s);
+              throw e;
+            });
   }
 
   dynamic call(HttpRequest request) async {
@@ -97,7 +99,7 @@ class Sevr {
     // _handleRequests(req, res,'GET');
     // return;
 
-    if (cors != null){
+    if (cors != null) {
       res.set('Access-Control-Allow-Origin', cors.allowed_origins.join(' | '));
       res.set('Access-Control-Allow-Headers', 'Content-Type');
     }
@@ -431,7 +433,6 @@ class Sevr {
         if (!fileC.streamController.isClosed) {
           await for (var data in fileC.streamController.stream) {
             //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-
           }
         }
       }
@@ -452,25 +453,28 @@ class Sevr {
 
       case CORS:
         cors = obj;
-        
-        router.optionss.addAll(router.gets.map((key, value){
-          return MapEntry(key, [(ServRequest req, ServResponse res){
-                return res.status(200);
-              }]);
+
+        router.optionss.addAll(router.gets.map((key, value) {
+          return MapEntry(key, [
+            (ServRequest req, ServResponse res) {
+              return res.status(200);
+            }
+          ]);
         }));
-        router.optionss.addAll(router.posts.map((key, value){
-          return MapEntry(key, [(ServRequest req, ServResponse res){
-                res.response.headers.removeAll('Content-Type');
-                res.response.headers.removeAll('x-content-type-options');
-                return res.status(200);
-              }]);
+        router.optionss.addAll(router.posts.map((key, value) {
+          return MapEntry(key, [
+            (ServRequest req, ServResponse res) {
+              res.response.headers.removeAll('Content-Type');
+              res.response.headers.removeAll('x-content-type-options');
+              return res.status(200);
+            }
+          ]);
         }));
         // router.optionss.addAll(router.gets.map((key, value){
         //   return MapEntry(key, [(ServRequest req, ServResponse res){
         //         return res.status(200);
         //       }]);
         // }));
-
 
         break;
       default:

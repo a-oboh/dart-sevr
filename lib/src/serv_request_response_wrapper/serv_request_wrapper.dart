@@ -13,7 +13,7 @@ class ServRequest {
   /// A map of parameters [:param] attached to requests
   Map<String, String> params = {};
   List currentExceptionList;
-  ServException _exceptionThrower;
+  // ServException _exceptionThrower;
   ServRequest(HttpRequest request) {
     this.request = request;
   }
