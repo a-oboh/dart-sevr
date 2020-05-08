@@ -17,3 +17,7 @@
 ## 1.0.3+1
 
 - Fix bugs.
+
+## 1.0.4
+
+- Added cors support, better error handling.

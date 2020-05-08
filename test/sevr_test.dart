@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:sevr/sevr.dart';
-import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/sevr_base.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as p;
@@ -11,7 +10,7 @@ void main() {
   Sevr sevr;
   var port = 8078;
 
-  var url = 'http://127.0.0.1:${port}';
+  // var url = 'http://127.0.0.1:${port}';
   group('Test host connection', () {
     setUp(() {
       sevr = Sevr();
@@ -53,12 +52,11 @@ void main() {
       var path = '/serve';
       var url = 'http://127.0.0.1:${port}';
       var response = await http.get('${url}${path}');
-      expect(response.body, File(p.absolute('example/web/index.html')).readAsStringSync());
-
-
+      expect(response.body,
+          File(p.absolute('example/web/index.html')).readAsStringSync());
     });
 
-///TODO: test file upload, it keeps failing
+    //TODO: test file upload, it keeps failing
 //     test('test body for url formencoded parsing', () async {
 //       var path = '/test';
 //       ServRequest svrq;
