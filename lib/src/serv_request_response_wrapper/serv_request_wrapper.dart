@@ -13,7 +13,7 @@ class ServRequest {
   /// A map of parameters [:param] attached to requests
   Map<String, String> params = {};
   List currentExceptionList;
-  ServException _exceptionThrower;
+  // ServException _exceptionThrower;
   ServRequest(HttpRequest request) {
     this.request = request;
   }
@@ -72,10 +72,10 @@ class ServResponse {
   }
 
   /// Return data in json format. data = a map to be converted to json
-  ServResponse json(Map<dynamic, dynamic> data) {
+  ServResponse json(Map<dynamic, dynamic> data,{Function(dynamic) toEncodable}) {
     response
       ..headers.contentType = ContentType.json
-      ..write(json_helper.json.encode(data));
+      ..write(json_helper.json.encode(data,toEncodable: toEncodable??(dynamic obj)=>obj is DateTime?obj.toIso8601String():obj.toString()));
 
     return this;
   }
