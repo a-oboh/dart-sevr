@@ -20,6 +20,7 @@ class Sevr {
   var host;
   List<SevrDir> servDirs = [];
   HttpServer server;
+  CORS cors;
 
   static SevrDir static(String dir) {
     return SevrDir(dir);
@@ -49,26 +50,36 @@ class Sevr {
   dynamic listen(int port,
       {Function callback,
       SecurityContext context,
-      String messageReturn}) async {
-    this.messageReturn = messageReturn;
-    if (callback != null) {
-      callback();
-    }
+      String messageReturn,
+      String address,
+      Function(Object e, StackTrace c) errorHandler}) async {
+    await runZoned(() async {
+      this.messageReturn = messageReturn;
+      if (callback != null) {
+        callback();
+      }
+      if (context == null) {
+        server = await HttpServer.bind(
+            address ?? InternetAddress.loopbackIPv4, port);
+      } else {
+        server = await HttpServer.bindSecure(
+            InternetAddress.loopbackIPv4, port, context);
+      }
 
-    if (context == null) {
-      server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
-    } else {
-      server = await HttpServer.bindSecure(
-          InternetAddress.loopbackIPv4, port, context);
-    }
+      this.port = port;
+      host = InternetAddress.loopbackIPv4;
 
-    this.port = port;
-    host = InternetAddress.loopbackIPv4;
-
-    await for (var request in server) {
-      //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
-      _serv(request);
-    }
+      await for (var request in server) {
+        //calls the class as a function to handle incoming requests: calling _serv(request) runs the call method in the Serv singleton instance class
+        _serv(request);
+      }
+    },
+        onError: errorHandler ??
+            (Object e, StackTrace s) {
+              print(e);
+              print(s);
+              throw e;
+            });
   }
 
   dynamic call(HttpRequest request) async {
@@ -80,8 +91,17 @@ class Sevr {
     // List<dynamic> tempOnData;
     // tempOnData = [];
 
-    if (contentType.contains('multipart/form-data')) {
-      contentType = 'multipart/form-data';
+    // if (contentType.contains('multipart/form-data')) {
+    //   contentType = 'multipart/form-data';
+    // }
+    // print(request);
+    // print('ggfc');
+    // _handleRequests(req, res,'GET');
+    // return;
+
+    if (cors != null) {
+      res.set('Access-Control-Allow-Origin', cors.allowed_origins.join(' | '));
+      res.set('Access-Control-Allow-Headers', 'Content-Type');
     }
 
     switch (ServContentType(contentType)) {
@@ -94,10 +114,12 @@ class Sevr {
             var s = String.fromCharCodes(downloadData);
             if (s.isNotEmpty) {
               jsonData.addAll(json.decode(s));
-              req.tempBody = jsonData.cast<String,dynamic>();
+              req.tempBody = jsonData.cast<String, dynamic>();
             }
+            _sub.cancel();
           } catch (e, stacktrace) {
-            req.currentExceptionList = [e,stacktrace];
+            req.currentExceptionList = [e, stacktrace];
+            rethrow;
           }
           _handleRequests(req, res, request.method);
         });
@@ -114,8 +136,8 @@ class Sevr {
           if (formDataObject.isBinary ||
               formDataObject.contentDisposition.parameters
                   .containsKey('filename')) {
-            // print('isBinary');
-            // print('${formDataObject.contentDisposition.parameters}');
+            print('isBinary');
+            print('${formDataObject.contentDisposition.parameters}');
             if (!fileKeys.contains(
                 formDataObject.contentDisposition.parameters['name'])) {
               fileKeys
@@ -311,19 +333,33 @@ class Sevr {
   void _handleRequests(
       ServRequest req, ServResponse res, String reqType) async {
     Map reqTypeMap = getAllRoutes[reqType];
+
     var path = req.path.endsWith('/')
         ? req.path.replaceRange(req.path.length - 1, req.path.length, '')
         : req.path;
+
     // print(path);
-    Map mapRes = getRouteParams(path, router.gets);
+    Map mapRes = getRouteParams(path, reqTypeMap);
     Map params = mapRes.containsKey('params') ? mapRes['params'] : null;
     req.params = params.cast<String, String>() ?? {};
     String matched = mapRes['route'];
     // print(matched);
-    List<Function(ServRequest, ServResponse)> selectedCallbacks =
-        reqTypeMap.containsKey(path)
-            ? reqTypeMap[path]
-            : matched != null ? reqTypeMap[matched] : null;
+    List<Function(ServRequest, ServResponse)> selectedCallbacks;
+
+    if (reqTypeMap.containsKey(path)) {
+      selectedCallbacks = reqTypeMap[path];
+    } else if (reqTypeMap.containsKey(path + '/')) {
+      selectedCallbacks = reqTypeMap[path + '/'];
+    } else if (matched != null) {
+      selectedCallbacks = reqTypeMap[matched];
+    } else {
+      selectedCallbacks = null;
+    }
+
+    // selectedCallbacks = reqTypeMap.containsKey(path)
+    //     ? reqTypeMap[path]
+    //     : matched != null ? reqTypeMap[matched] : null;
+
     if (selectedCallbacks != null && selectedCallbacks.isNotEmpty) {
       for (var func in selectedCallbacks) {
         var result = await func(req, res);
@@ -397,7 +433,6 @@ class Sevr {
         if (!fileC.streamController.isClosed) {
           await for (var data in fileC.streamController.stream) {
             //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
-
           }
         }
       }
@@ -416,6 +451,31 @@ class Sevr {
         router.join(obj);
         break;
 
+      case CORS:
+        cors = obj;
+
+        router.optionss.addAll(router.gets.map((key, value) {
+          return MapEntry(key, [
+            (ServRequest req, ServResponse res) {
+              return res.status(200);
+            }
+          ]);
+        }));
+        router.optionss.addAll(router.posts.map((key, value) {
+          return MapEntry(key, [
+            (ServRequest req, ServResponse res) {
+              res.response.headers.removeAll('Content-Type');
+              res.response.headers.removeAll('x-content-type-options');
+              return res.status(200);
+            }
+          ]);
+        }));
+        // router.optionss.addAll(router.gets.map((key, value){
+        //   return MapEntry(key, [(ServRequest req, ServResponse res){
+        //         return res.status(200);
+        //       }]);
+        // }));
+
         break;
       default:
     }
@@ -432,4 +492,10 @@ class SevrDir {
 class UpperCase extends Converter<String, String> {
   @override
   String convert(String input) => input.toUpperCase();
+}
+
+class CORS {
+  final List<String> allowed_origins;
+
+  CORS(this.allowed_origins);
 }
