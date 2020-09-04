@@ -281,7 +281,6 @@ class OpenApiPath {
       'summary': '$summary',
       'description': '$description'
     } ;
-    LogService.logger.e(methods.length);
     res.addEntries([...methods.map((e) => e.toJsonEntry)]);
     return res;
   }
