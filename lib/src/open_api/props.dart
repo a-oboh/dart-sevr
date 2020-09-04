@@ -1,5 +1,4 @@
 import 'package:sevr/src/extensions/extensions.dart';
-import 'package:sevr/src/logger/logger.dart';
 import 'package:meta/meta.dart';
 class OpenApiGlobal {
   static Map<String, dynamic> global = {};
