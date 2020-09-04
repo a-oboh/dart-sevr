@@ -243,7 +243,6 @@ class Router {
 
     var file = File('./openapi.json');
     var encoder = JsonEncoder.withIndent('     ');
-
     file.writeAsStringSync(encoder.convert(mainOpenApi.toJson));
     get('/openapi.json', [
       (ServRequest req, ServResponse res)async{
