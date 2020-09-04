@@ -523,7 +523,6 @@ class OpenApiMainObj {
     if (security.isNotEmptyObj) {
       res.addEntries([MapEntry('security', security.map((e) => e.toJson))]);
     }
-    print(res);
     
     return res;
   }
