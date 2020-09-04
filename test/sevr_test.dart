@@ -4,9 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:sevr/sevr.dart';
 import 'package:sevr/src/serv_content_types/serv_content_types.dart';
 import 'package:sevr/src/sevr_base.dart';
-import 'package:test/test.dart';
 import 'package:path/path.dart' as p;
-
+import '../lib/sevr.dart';
 void main() {
   Sevr sevr;
   var port = 8078;

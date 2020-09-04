@@ -431,6 +431,7 @@ class Sevr {
         SevrFile fileC;
         fileC = req.files[req.files.keys.toList()[i]];
         if (!fileC.streamController.isClosed) {
+          // ignore: unused_local_variable
           await for (var data in fileC.streamController.stream) {
             //do nothing, consume file stream incase it wasn't consumed before to avoid throwing errors
           }
