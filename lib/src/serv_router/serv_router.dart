@@ -270,7 +270,6 @@ class Router {
         responses: resp);
     paths.putIfAbsent(path, () => OpenApiPath(path: path, methods: []))
       ..methods.add(thisPathMethod);
-    print(paths);
   }
 
   void formatRouteConsoleOutput(
