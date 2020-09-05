@@ -147,7 +147,8 @@ class Router {
           ?.reflectee as Route;
       var classUrl = controllerRouteAnnottation.url;
       var tag = controllerRouteAnnottation.tag;
-      for (var j in [...ref.type.staticMembers.entries,...ref.type.instanceMembers.entries ]) {
+      for (var j in [...ref.type.staticMembers.entries ]) {
+        LogService.logger.i('registernnfdgnfgd odbnfol');
         // var key = j.key;
         var value = j.value;
         var methodRouteAnnotation = value.metadata
@@ -179,7 +180,7 @@ class Router {
             get(methodUrl, [
               ...methodRouteAnnotation.middlewares,
               (ServRequest req, ServResponse res) {
-                return ref.type.invoke(value.simpleName, [req, res]).reflectee;
+                return ref.type.invoke(value.simpleName, [req, res]);
               }
             ]);
             break;
