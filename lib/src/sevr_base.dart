@@ -60,10 +60,10 @@ class Sevr {
       }
       if (context == null) {
         server = await HttpServer.bind(
-            address ?? InternetAddress.loopbackIPv4, port);
+            address ?? InternetAddress.anyIPv4, port);
       } else {
         server = await HttpServer.bindSecure(
-            InternetAddress.loopbackIPv4, port, context);
+            InternetAddress.anyIPv4, port, context);
       }
 
       this.port = port;
