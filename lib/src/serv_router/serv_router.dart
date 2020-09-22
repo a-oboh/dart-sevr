@@ -147,8 +147,7 @@ class Router {
           ?.reflectee as Route;
       var classUrl = controllerRouteAnnottation.url;
       var tag = controllerRouteAnnottation.tag;
-      for (var j in [...ref.type.staticMembers.entries ]) {
-        LogService.logger.i('registernnfdgnfgd odbnfol');
+      for (var j in [...ref.type.instanceMembers.entries, ...ref.type.staticMembers.entries ]) {
         // var key = j.key;
         var value = j.value;
         var methodRouteAnnotation = value.metadata
@@ -172,7 +171,7 @@ class Router {
               ...methodRouteAnnotation.middlewares,
               (ServRequest req, ServResponse res) {
                 print('accessing ${methodUrl}');
-                return ref.type.invoke(value.simpleName, [req, res]).reflectee;
+                return  _invokeApi(ref, value.simpleName, [req,res], value.isStatic);
               }
             ]);
             break;
@@ -180,7 +179,7 @@ class Router {
             get(methodUrl, [
               ...methodRouteAnnotation.middlewares,
               (ServRequest req, ServResponse res) {
-                return ref.type.invoke(value.simpleName, [req, res]);
+                return  _invokeApi(ref, value.simpleName, [req,res], value.isStatic);
               }
             ]);
             break;
@@ -188,7 +187,7 @@ class Router {
             put(methodUrl, [
               ...methodRouteAnnotation.middlewares,
               (ServRequest req, ServResponse res) {
-                return ref.type.invoke(value.simpleName, [req, res]).reflectee;
+                return  _invokeApi(ref, value.simpleName, [req,res], value.isStatic);
               }
             ]);
             break;
@@ -196,7 +195,7 @@ class Router {
             delete(methodUrl, [
               ...methodRouteAnnotation.middlewares,
               (ServRequest req, ServResponse res) {
-                return ref.type.invoke(value.simpleName, [req, res]).reflectee;
+                return  _invokeApi(ref, value.simpleName, [req,res], value.isStatic);
               }
             ]);
             break;
@@ -204,7 +203,7 @@ class Router {
             patch(methodUrl, [
               ...methodRouteAnnotation.middlewares,
               (ServRequest req, ServResponse res) {
-                return ref.type.invoke(value.simpleName, [req, res]).reflectee;
+                return  _invokeApi(ref, value.simpleName, [req,res], value.isStatic);
               }
             ]);
             break;
@@ -226,6 +225,12 @@ class Router {
       LogService.logger.i(value.toJsonEntry);
     });
     generateOpenApi();
+  }
+
+  dynamic _invokeApi(InstanceMirror ref ,Symbol member, List<dynamic> requestObjs, bool isStatic){
+
+    return (isStatic?ref.type:ref).invoke(member, requestObjs).reflectee;
+
   }
 
   Router({this.controllers = const [],this.serverObjs = const[], this.openApiMainInfo});

@@ -213,6 +213,7 @@ class OpenApiParamObject {
   }
 }
 
+
 class OpenApiMethod {
   final OpenApiHttpMethod method;
   final List<String> tags;
@@ -264,7 +265,7 @@ class OpenApiMethod {
 }
 
 class OpenApiPath {
-  final String path;
+  String path;
   final String summary;
   final String description;
   final List<OpenApiMethod> methods;
@@ -281,7 +282,20 @@ class OpenApiPath {
   }
 
   MapEntry<String, dynamic> get toJsonEntry {
-    return MapEntry(path.startsWith('/') ? path : '/$path', _toJson);
+    return MapEntry(_getRealPath.startsWith('/') ? path : '/$path', _toJson);
+  }
+
+  String get _getRealPath {
+    var p = path;
+    methods.forEach((element) {
+      element.parameters.forEach((element) {
+        if (element.in_ == OpenApiLocationType.path){
+          p = p.replaceFirst(':${element.name}', '{${element.name}}');
+        }
+      });
+    });
+    return p;
+
   }
 }
 
@@ -437,7 +451,7 @@ class OpenApiSecurityRequirementObj {
 
 enum OpenApiSecuritySchemaType { apiKey, http, oauth2, openIdConnect }
 
-enum OpenApiLocationType { query, header, cookie }
+enum OpenApiLocationType { query, header, cookie, path }
 
 class OauthFlowsObject {
   ///Configuration for the OAuth Implicit flow
