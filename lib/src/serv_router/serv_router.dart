@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:mirrors';
 
 import 'package:sevr/src/logger/logger.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
@@ -9,6 +8,17 @@ import 'package:sevr/src/extensions/extensions.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:sevr/src/open_api/props.dart';
+import 'package:reflectable/reflectable.dart';
+
+import 'routes.dart';
+
+// Annotate with this class to enable reflection.
+class ControllerReflector extends Reflectable {
+  const ControllerReflector()
+      : super(const InvokingCapability(''), metadataCapability,
+            declarationsCapability); // Request the capability to invoke methods.
+}
+const controller = ControllerReflector();
 
 class Router {
   Map<String, List<Function(ServRequest req, ServResponse res)>> gets = {};
@@ -140,20 +150,20 @@ class Router {
   void registerViaMetaDatas() async {
     //register controllers and generate
     for (var i = 0; i < controllers.length; i++) {
-      var ref = reflect(controllers[i]);
+      var ref = controller.reflect(controllers[i]);
       var controllerRouteAnnottation = ref.type.metadata
-          .lastWhere((element) => element.reflectee is Route,
+          .lastWhere((element) => element is Route,
               orElse: () => null)
-          ?.reflectee as Route;
+           as Route;
       var classUrl = controllerRouteAnnottation.url;
       var tag = controllerRouteAnnottation.tag;
       for (var j in [...ref.type.instanceMembers.entries, ...ref.type.staticMembers.entries ]) {
         // var key = j.key;
         var value = j.value;
         var methodRouteAnnotation = value.metadata
-            .lastWhere((element) => element.reflectee is Route,
+            .lastWhere((element) => element is Route,
                 orElse: () => null)
-            ?.reflectee as Route;
+            as Route;
         if (methodRouteAnnotation.isEmptyObj) {
           continue;
         }
@@ -163,8 +173,8 @@ class Router {
         var paramDef = methodRouteAnnotation.openApiParamDef??[];
         var respDef = methodRouteAnnotation.openApiResponseDef;
         var summary = methodRouteAnnotation.summary;
-        var operationId = '${MirrorSystem.getName(value.simpleName)}Id';
-        var pathSegment = value.location.sourceUri.pathSegments[0];
+        var operationId = '${value.simpleName}Id';
+        // var pathSegment = value.location.sourceUri.pathSegments[0];
         switch (method) {
           case 'POST':
             post(methodUrl, [
@@ -216,8 +226,8 @@ class Router {
         formatRouteConsoleOutput(
             method: method,
             methodName: value.simpleName,
-            methodPath:
-                '${value.location.sourceUri.path.replaceFirst('${pathSegment}', '')}:${value.location.line}:${value.location.column}',
+            methodPath:'',
+                //'${value.location.sourceUri.path.replaceFirst('${pathSegment}', '')}:${value.location.line}:${value.location.column}',
             methodUrl: methodUrl);
       }
     }
@@ -227,9 +237,9 @@ class Router {
     generateOpenApi();
   }
 
-  dynamic _invokeApi(InstanceMirror ref ,Symbol member, List<dynamic> requestObjs, bool isStatic){
+  dynamic _invokeApi(InstanceMirror ref ,String member, List<dynamic> requestObjs, bool isStatic){
 
-    return (isStatic?ref.type:ref).invoke(member, requestObjs).reflectee;
+    return (isStatic?ref.type:ref).invoke(member, requestObjs);
 
   }
 
@@ -278,11 +288,11 @@ class Router {
   }
 
   void formatRouteConsoleOutput(
-      {@required Symbol methodName,
+      {@required String methodName,
       @required method,
       @required methodUrl,
       @required methodPath}) {
     LogService.logger.i(
-        '${MirrorSystem.getName(methodName)}\n${method}\n${methodUrl}\n${methodPath}');
+        '${methodName}\n${method}\n${methodUrl}\n${methodPath}');
   }
 }
