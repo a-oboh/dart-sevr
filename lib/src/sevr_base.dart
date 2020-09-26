@@ -33,10 +33,11 @@ class Sevr {
 
   Sevr._internal();
 
-  void close() async {
+  Future<void> close() async {
     if (server != null) {
-      await server.close(force: true);
+      return await server.close(force: true);
     }
+    return;
   }
 
   void restart() async {
