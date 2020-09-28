@@ -229,6 +229,7 @@ class OpenApiMethod {
 
   Map get _toJson {
     var res = {
+      'tags': tags,
       'summary': '$summary',
       'operationId': operationId,
       'parameters': [...parameters.map((e) => e.toJson)],
