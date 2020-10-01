@@ -603,7 +603,7 @@ class OpenApiSchemeProp {
 
 class OpenApiSchemaObj {
   final List<OpenApiProp> properties;
-  final String title;
+  String title;
   final List<String> requiredfields;
   final Type type;
 

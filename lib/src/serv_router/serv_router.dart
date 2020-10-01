@@ -152,8 +152,8 @@ class Router {
     for (var i = 0; i < controllers.length; i++) {
       var ref = reflect(controllers[i]);
       var controllerRouteAnnottation = ref.type.metadata
-          .lastWhere((element) => element is Route,
-              orElse: () => null)
+          .lastWhere((element) => element.reflectee is Route,
+              orElse: () => null)?.reflectee
            as Route;
       var classUrl = controllerRouteAnnottation.url;
       var tag = controllerRouteAnnottation.tag;
@@ -161,8 +161,8 @@ class Router {
         // var key = j.key;
         var value = j.value;
         var methodRouteAnnotation = value.metadata
-            .lastWhere((element) => element is Route,
-                orElse: () => null)
+            .lastWhere((element) => element.reflectee is Route,
+                orElse: () => null)?.reflectee
             as Route;
         if (methodRouteAnnotation.isEmptyObj) {
           continue;
