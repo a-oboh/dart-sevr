@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:mirrors';
 
 import 'package:sevr/src/logger/logger.dart';
 import 'package:sevr/src/serv_request_response_wrapper/serv_request_wrapper.dart';
@@ -8,15 +9,14 @@ import 'package:sevr/src/extensions/extensions.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:sevr/src/open_api/props.dart';
-import 'package:reflectable/reflectable.dart';
 
 import 'routes.dart';
 
 // Annotate with this class to enable reflection.
-class ControllerReflector extends Reflectable {
-  const ControllerReflector()
-      : super(const InvokingCapability(''), metadataCapability,
-            declarationsCapability); // Request the capability to invoke methods.
+class ControllerReflector {
+  const ControllerReflector();
+      // : super(const InvokingCapability(''), metadataCapability,
+      //       declarationsCapability); // Request the capability to invoke methods.
 }
 const controller = ControllerReflector();
 
@@ -150,7 +150,7 @@ class Router {
   void registerViaMetaDatas() async {
     //register controllers and generate
     for (var i = 0; i < controllers.length; i++) {
-      var ref = controller.reflect(controllers[i]);
+      var ref = reflect(controllers[i]);
       var controllerRouteAnnottation = ref.type.metadata
           .lastWhere((element) => element is Route,
               orElse: () => null)
@@ -174,7 +174,7 @@ class Router {
         var respDef = methodRouteAnnotation.openApiResponseDef;
         var summary = methodRouteAnnotation.summary;
         var operationId = '${value.simpleName}Id';
-        // var pathSegment = value.location.sourceUri.pathSegments[0];
+        var pathSegment = value.location.sourceUri.pathSegments[0];
         switch (method) {
           case 'POST':
             post(methodUrl, [
@@ -225,9 +225,9 @@ class Router {
             summary: summary, parameters: paramDef);
         formatRouteConsoleOutput(
             method: method,
-            methodName: value.simpleName,
-            methodPath:'',
-                //'${value.location.sourceUri.path.replaceFirst('${pathSegment}', '')}:${value.location.line}:${value.location.column}',
+            methodName: MirrorSystem.getName(value.simpleName),
+            methodPath:
+                '${value.location.sourceUri.path.replaceFirst('${pathSegment}', '')}:${value.location.line}:${value.location.column}',
             methodUrl: methodUrl);
       }
     }
@@ -237,7 +237,7 @@ class Router {
     generateOpenApi();
   }
 
-  dynamic _invokeApi(InstanceMirror ref ,String member, List<dynamic> requestObjs, bool isStatic){
+  dynamic _invokeApi(InstanceMirror ref ,Symbol member, List<dynamic> requestObjs, bool isStatic){
 
     return (isStatic?ref.type:ref).invoke(member, requestObjs);
 
@@ -287,7 +287,7 @@ class Router {
       ..methods.add(thisPathMethod);
   }
 
-  void formatRouteConsoleOutput(
+  void formatRouteConsoleOutput( 
       {@required String methodName,
       @required method,
       @required methodUrl,
